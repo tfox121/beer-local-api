@@ -1,0 +1,36 @@
+{
+  "name": "beer-local-api",
+  "version": "1.0.0",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "4.16.4",
+    "express-jwt": "^5.3.3",
+    "express-jwt-authz": "^2.4.0",
+    "express-session": "^1.17.1",
+    "ip": "1.1.5",
+    "jwks-rsa": "^1.8.1",
+    "minimist": "1.2.0",
+    "mongodb": "^3.5.9",
+    "mongoose": "^5.9.20",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.2"
+  },
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:dev": "nodemon ./index.js",
+    "start": "node ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint-all": "npx eslint --fix \"{,!(node_modules)/**/}*.{js,jsx}\""
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "nodemon": "^2.0.2"
+  }
+}
