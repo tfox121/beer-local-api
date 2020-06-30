@@ -53,7 +53,7 @@ module.exports = class UserStore {
       {
         sub,
         ...profileData,
-        retailerId: profileData.businessName.toLowerCase().replace(/\s+/g, ''),
+        retailerId: profileData.premisesName.toLowerCase().replace(/\s+/g, ''),
         avatarSource: `/images/avatars/${
           profileData.avatar ? sub : 'blank'
         }-profile`,
