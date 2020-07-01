@@ -20,10 +20,11 @@ const RetailerUserSchema = new mongoose.Schema({
   premisesName: { type: String, required: true },
   retailerId: { type: String, required: true },
   purchasingEmail: { type: String, required: true },
-  purchasingContactNumber: { type: String },
+  purchasingContactNumber: { type: String, required: true },
   website: { type: String },
   avatarSource: { type: String },
   location: {},
+  address: { type: String, required: true },
   contactOptions: {},
   terms: { type: Boolean, required: true },
 });

@@ -27,6 +27,7 @@ const ProducerUserSchema = new mongoose.Schema({
   intro: { type: String },
   avatarSource: { type: String },
   location: {},
+  address: { type: String },
   distributionAreas: {},
   stock: [],
   terms: { type: Boolean, required: true },

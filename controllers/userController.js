@@ -78,6 +78,10 @@ module.exports = class UserController {
       upload(req, res, err => {
         if (err) {
           console.error(err);
+          res.status(500).send({
+            message: 'File upload error',
+          });
+          return next(err);
         }
         console.log('Request ---', req.body);
         console.log('Request file ---', req.file);
@@ -86,7 +90,7 @@ module.exports = class UserController {
       });
     } catch (err) {
       res.status(500).send({
-        message: 'User retrieval error',
+        message: 'File upload error',
       });
       next(err);
     }

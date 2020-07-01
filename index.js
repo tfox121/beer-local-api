@@ -38,9 +38,10 @@ const checkJwt = jwt({
 // If you need a backend, e.g. an API, add your custom backend-specific middleware here
 // app.use('/api', myApi);
 
-const whitelist = ['http://localhost:3000', 'https://beer-local.herokuapp.com'];
+const whitelist = [undefined, 'http://localhost:3000', 'https://beer-local.herokuapp.com/'];
 const corsOptions = {
   origin(origin, callback) {
+    console.log("ORIGIN", origin)
     if (whitelist.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -53,7 +54,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(express.static(path.join(__dirname, 'public')));
+// console.log(path.join(__dirname, 'public'))
+
+app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(logger('dev'));
