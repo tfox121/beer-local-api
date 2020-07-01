@@ -38,18 +38,39 @@ const checkJwt = jwt({
 // If you need a backend, e.g. an API, add your custom backend-specific middleware here
 // app.use('/api', myApi);
 
-const whitelist = [undefined, 'http://localhost:3000', 'https://beer-local.herokuapp.com/'];
+app.use((req, res, next) => {
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+  );
+
+  // Request headers you wish to allow
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-Requested-With,content-type',
+  );
+
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
+
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+
+  // Pass to next layer of middleware
+  next();
+});
+
+const whitelist = ['http://localhost:3000', 'https://beer-local.herokuapp.com/'];
 const corsOptions = {
+  optionsSuccessStatus: 200,
   origin(origin, callback) {
-    console.log("ORIGIN", origin)
-    if (whitelist.indexOf(origin) !== -1) {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true, // allow session cookie from browser to pass through
 };
 
 app.use(cors(corsOptions));
