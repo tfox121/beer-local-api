@@ -12,4 +12,6 @@ router.post('/retailer', UserController.findUpdateCreateRetailerUser);
 
 router.post('/avatar', UserController.avatarUpload);
 
+router.get('/orders', UserController.getOrders);
+
 module.exports = router;

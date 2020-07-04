@@ -27,33 +27,33 @@ const getAccessToken = async () => {
 const authExtEndpoint =
   'https://tfox121.eu.webtask.io/adf6e2f2b84784b57522e3b19dfc9201/api';
 
-// const getAllUsers = async () => {
-//   const accessToken = await getAccessToken();
-//   const options = {
-//     method: 'GET',
-//     url: `${authExtEndpoint}/users`,
-//     headers: {
-//       Authorization: `Bearer ${accessToken}`,
-//     },
-//   };
+const getAllUsers = async () => {
+  const accessToken = await getAccessToken();
+  const options = {
+    method: 'GET',
+    url: `${authExtEndpoint}/users`,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  };
 
-//   const response = await axios(options);
-//   console.log(response.data);
-// };
+  const response = await axios(options);
+  console.log(response.data);
+};
 
-// const getAllRoles = async () => {
-//   const accessToken = await getAccessToken();
-//   const options = {
-//     method: 'GET',
-//     url: `${authExtEndpoint}/roles`,
-//     headers: {
-//       Authorization: `Bearer ${accessToken}`,
-//     },
-//   };
+const getAllRoles = async () => {
+  const accessToken = await getAccessToken();
+  const options = {
+    method: 'GET',
+    url: `${authExtEndpoint}/roles`,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  };
 
-//   const response = await axios(options);
-//   console.log(response.data);
-// };
+  const response = await axios(options);
+  console.log(response.data);
+};
 
 const getUserRoles = async userId => {
   const accessToken = await getAccessToken();
@@ -100,7 +100,7 @@ const deleteVisitorRole = async userId => {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    data: process.env.AUTH0_VISITOR_ROLE_ID,
+    data: [process.env.AUTH0_VISITOR_ROLE_ID],
   };
 
   try {
@@ -112,8 +112,31 @@ const deleteVisitorRole = async userId => {
   }
 };
 
-// addRole('auth0|5ef3fd6aa84b0d0014a3b6a4', '1713f9ea-09e2-4627-aa0a-0516a2319991');
-// getRoles('auth0|5ef3fd6aa84b0d0014a3b6a4');
+const deleteRole = async (userId, roleId)=> {
+  const accessToken = await getAccessToken();
+  const options = {
+    method: 'DELETE',
+    url: `${authExtEndpoint}/users/${userId}/roles`,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    data: [roleId],
+  };
+
+  try {
+    const response = await axios(options);
+    console.log(response.data);
+    return response.data;
+  } catch (err) {
+    return err;
+  }
+};
+
+addRole('google-oauth2|111022946565379782477', '1713f9ea-09e2-4627-aa0a-0516a2319991');
+// deleteVisitorRole('google-oauth2|111800037433064663863');
+
+// getUserRoles('google-oauth2|111022946565379782477');
 // getAllRoles();
+// getAllUsers()
 
 module.exports = { getUserRoles, addRole, deleteVisitorRole };

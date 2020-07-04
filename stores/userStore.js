@@ -1,37 +1,29 @@
-/* eslint-disable camelcase */
-// const User = require('../models/user');
-const producerUser = require('../models/producerUser');
-const retailerUser = require('../models/retailerUser');
-
-const { addRole, deleteVisitorRole } = require('../roles');
+const User = require('../models/user')
+const ProducerUser = require('../models/producerUser');
+const RetailerUser = require('../models/retailerUser');
+const Order = require('../models/order') 
 
 module.exports = class UserStore {
-  // find user according to id and role
-  static async findUser(sub, roles) {
-    console.log('FINDING', sub, roles);
-    if (roles.length > 1) {
-      return new Error('Too many roles');
-    }
-    if (roles.includes('Producer')) {
-      return producerUser.findOne({ sub });
-    }
-    if (roles.includes('Retailer')) {
-      return retailerUser.findOne({ sub });
-    }
-    return new Error('Invalid role');
+  // find user according to id
+  static async findUser(sub) {
+    return User.findOne({ sub });
   }
 
-  // add new PRODUCER user if they don't exist or update if they do
-  static async findUpdateCreateProducerUser(sub, profileData) {
-    console.log('FINDING', sub, profileData);
-    deleteVisitorRole(sub);
-    addRole(sub, process.env.AUTH0_PRODUCER_ROLE_ID);
-    return producerUser.findOneAndUpdate(
-      sub,
+  static async findProducerUser(sub) {
+    return ProducerUser.findOne({ sub });
+  }
+
+  static async findRetailerUser(sub) {
+    return RetailerUser.findOne({ sub });
+  }
+
+  static async findUpdateCreateUser(sub, profileData, role) {
+    return User.findOneAndUpdate(
+      {sub},
       {
         sub,
+        role,
         ...profileData,
-        producerId: profileData.businessName.toLowerCase().replace(/\s+/g, ''),
         avatarSource: profileData.avatar
           ? `/images/avatars/${sub}-profile.${profileData.pictureFileExt}`
           : `/images/avatars/blank-profile.webp`,
@@ -43,20 +35,14 @@ module.exports = class UserStore {
     );
   }
 
-  // add new RETAILER user if they don't exist or update if they do
-  static async findUpdateCreateRetailerUser(sub, profileData) {
-    console.log('FINDING', sub, profileData);
-    deleteVisitorRole(sub);
-    addRole(sub, process.env.AUTH0_RETAILER_ROLE_ID);
-    return retailerUser.findOneAndUpdate(
-      sub,
+  // add new PRODUCER user if they don't exist or update if they do
+  static async findUpdateCreateProducerUser(sub, profileData) {
+    return ProducerUser.findOneAndUpdate(
+      { sub },
       {
         sub,
         ...profileData,
-        retailerId: profileData.premisesName.toLowerCase().replace(/\s+/g, ''),
-        avatarSource: `/images/avatars/${
-          profileData.avatar ? sub : 'blank'
-        }-profile`,
+        producerId: profileData.businessName.toLowerCase().replace(/\s+/g, ''),
       },
       {
         new: true,
@@ -65,29 +51,26 @@ module.exports = class UserStore {
     );
   }
 
-  // static async getUser(id) {
-  //   return User.findById(id).exec();
-  // }
+  // add new RETAILER user if they don't exist or update if they do
+  static async findUpdateCreateRetailerUser(sub, profileData) {
+    console.log('FINDING', sub, profileData);
+    return RetailerUser.findOneAndUpdate(
+      { sub },
+      {
+        sub,
+        ...profileData,
+        retailerId: profileData.businessName.toLowerCase().replace(/\s+/g, ''),
+      },
+      {
+        new: true,
+        upsert: true,
+      },
+    );
+  }
 
-  // // add new user if they don't exist or update if they do
-  // static async findUpdateCreateUser({
-  //   email,
-  //   name,
-  //   given_name,
-  //   family_name,
-  //   picture,
-  //   locale,
-  //   sub,
-  // }) {
-  //   const updates = {
-  //     email,
-  //     name,
-  //     givenName: given_name,
-  //     familyName: family_name,
-  //     picture,
-  //     locale,
-  //     socialId: sub,
-  //   };
-  //   return User.findOneAndUpdate({ socialId: sub }, updates, { upsert: true });
-  // }
+  static async getOrders(sub, role) {
+    console.log("Role", role)
+    return Order.find({ [`${role}Sub`]: sub })
+  }
+
 };

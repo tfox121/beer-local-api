@@ -11,9 +11,12 @@ const argv = require('./argv');
 const port = require('./port');
 const app = express();
 
-const userRoute = require('./routes/userRoute');
-const publicRoute = require('./routes/publicRoute');
-const producerRoute = require('./routes/producerRoute');
+const UserStore = require('./stores/userStore');
+const UserRoute = require('./routes/userRoute');
+const PublicRoute = require('./routes/publicRoute');
+const ProducerRoute = require('./routes/producerRoute');
+const RetailerRoute = require('./routes/retailerRoute');
+
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -48,6 +51,7 @@ app.use((req, res, next) => {
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-Requested-With,content-type',
+    'Authorization'
   );
 
   // Set to true if you need the website to include cookies in the requests sent
@@ -55,7 +59,6 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
 
   res.setHeader('Access-Control-Allow-Origin', '*');
-
 
   // Pass to next layer of middleware
   next();
@@ -82,10 +85,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(logger('dev'));
 
+const attachUser = async (req, res, next) => {
+  if (req.user && req.user.sub) {
+    const user = await UserStore.findUser(req.user.sub)
+    if(user) {
+      req.role = user.role
+    }
+  }
+  next()
+}
+
+
 // Routes
-app.use('/api/private/user', checkJwt, userRoute);
-app.use('/api/private/producer', checkJwt, producerRoute);
-app.use('/api', publicRoute);
+app.use('/api/private/user', checkJwt, attachUser, UserRoute);
+app.use('/api/private/producer', checkJwt, attachUser, ProducerRoute);
+app.use('/api/private/retailer', checkJwt, attachUser, RetailerRoute);
+app.use('/api', PublicRoute);
+
+
 
 // In production we need to pass these values in instead of relying on webpack
 // setup(app, {
@@ -97,14 +114,6 @@ app.use('/api', publicRoute);
 const customHost = argv.host || process.env.HOST;
 const host = customHost || null; // Let http.Server use its default IPv6/4 host
 
-// use the gzipped bundle
-// app.get('*.js', (req, res, next) => {
-//   req.url = req.url + '.gz'; // eslint-disable-line
-//   res.set('Content-Encoding', 'gzip');
-//   next();
-// });
-
-// Start your app.
 app.listen(port, host, async err => {
   if (err) {
     return logger.error(err.message);

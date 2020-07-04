@@ -1,16 +1,31 @@
 const multer = require('multer');
 const path = require('path');
 const UserStore = require('../stores/userStore');
+const ProducerStore = require('../stores/producerStore');
+const RetailerStore = require('../stores/retailerStore');
+
 
 module.exports = class UserController {
   static async findUser(req, res, next) {
     try {
-      const user = await UserStore.findUser(
-        req.user.sub,
-        req.user['https://beerlocal/apiroles'],
-      );
-      if (user) {
-        return res.json(user);
+      console.log("FINDING USER", req.user)
+      const user = await UserStore.findUser(req.user.sub);
+      let business
+      switch (req.role) {
+        case 'producer':
+          business = await UserStore.findProducerUser(req.user.sub);
+          break;
+        case 'retailer':
+          business = await UserStore.findRetailerUser(req.user.sub)
+          break;
+        default:
+          return res.status(400).send({
+            message: 'Invalid role',
+          });
+          break
+      }
+      if (user && business) {
+        return res.json({user, business});
       }
       return res.status(404).send({
         message: 'User not found',
@@ -26,14 +41,16 @@ module.exports = class UserController {
 
   static async findUpdateCreateProducerUser(req, res, next) {
     try {
-      // console.log('USER?', req.user.sub);
-
-      const user = await UserStore.findUpdateCreateProducerUser(
+      const user = await UserStore.findUpdateCreateUser(
+        req.user.sub,
+        req.body,
+        'producer'
+      );
+      const business = await UserStore.findUpdateCreateProducerUser(
         req.user.sub,
         req.body,
       );
-      console.log('PROUCER USER CREATED', user);
-      res.json(user);
+      res.json({ user, business });
     } catch (err) {
       res.status(500).send({
         message: 'User retrieval error',
@@ -44,12 +61,17 @@ module.exports = class UserController {
 
   static async findUpdateCreateRetailerUser(req, res, next) {
     try {
-      const user = await UserStore.findUpdateCreateRetailerUser(
+      const user = await UserStore.findUpdateCreateUser(
+        req.user.sub,
+        req.body,
+        'retailer'
+      );
+      const business = await UserStore.findUpdateCreateRetailerUser(
         req.user.sub,
         req.body,
       );
-      console.log('RETAILER USER CREATED', user);
-      res.json(user);
+      console.log('RETAILER USER CREATED', user, business);
+      res.json({ user, business });
     } catch (err) {
       res.status(500).send({
         message: 'User retrieval error',
@@ -93,6 +115,40 @@ module.exports = class UserController {
         message: 'File upload error',
       });
       next(err);
+    }
+  }
+
+  static async getOrders(req, res, next) {
+    try {
+      console.log("ROLE", req.role)
+      const orders = await UserStore.getOrders(req.user.sub, req.role);
+      if (orders || orders.length) {
+        if (req.role === 'producer') {
+          const purchasers = await Promise.all(orders.map(async (order) => {
+            const purchaser = await RetailerStore.findBySub(order.retailerSub)
+            return purchaser
+          }))
+          console.log("PURCHASER", purchasers)
+          return res.json({ orders: orders.reverse(), businesses: purchasers.reverse() });
+        }
+        if (req.role === 'retailer') {
+          const producers = await Promise.all(orders.map(async (order) => {
+            const producer = await ProducerStore.findBySub(order.producerSub)
+            return producer
+          }))
+          console.log(producers)
+          return res.json({ orders: orders.reverse(), businesses: producers.reverse() });
+        }
+      }
+      return res.status(404).send({
+        message: 'No orders found'
+      })
+    } catch (err) {
+      res.status(500).send({
+        message: 'Order fetch error',
+        error: err,
+      });
+      return next(err);
     }
   }
 
