@@ -2,9 +2,13 @@ const router = require('express').Router();
 
 const ProducerController = require('../controllers/producerController');
 
+router.patch('/profile', ProducerController.updateProfileOptions);
+
 router.patch('/stock', ProducerController.updateStock);
 
 router.post('/blog', ProducerController.addBlogPost);
+
+router.patch('/blog', ProducerController.editBlogPost);
 
 router.patch('/orders', ProducerController.editOrderStatus);
 

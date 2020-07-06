@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const StockSchema = new mongoose.Schema({
   id: { type: String, required: true },
+  category: { type: String },
   sku: { type: String },
   price: { type: Number, required: true },
   name: { type: String, required: true },

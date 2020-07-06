@@ -4,11 +4,17 @@ const Order = require('../models/order')
 
 module.exports = class UserStore {
   // find user according to id and role
-  static async findByProducerId(producerId) {
+  static async findById(producerId) {
     return ProducerUser.findOne({ producerId });
   }
 
-  static async getProducers() {
+  static async findBySub(sub) {
+    const producer = await ProducerUser.findOne({ sub });
+    const user = await User.findOne({ sub })
+    return { ...user._doc, ...producer._doc }
+  }
+
+  static async getAll() {
     const producers = await ProducerUser.find({});
     const users = await User.find({ role: 'producer' })
 
@@ -17,10 +23,10 @@ module.exports = class UserStore {
     })
   }
 
-  static async findBySub(sub) {
+  static async updateProfileOptions(sub, optionsChange) {
     const producer = await ProducerUser.findOne({ sub });
-    const user = await User.findOne({ sub })
-    return { ...user._doc, ...producer._doc }
+    producer.profileOptions[optionsChange.name] = optionsChange.payload
+    return producer.save()
   }
 
   static async updateStock(sub, stockData) {
@@ -35,10 +41,20 @@ module.exports = class UserStore {
     );
   }
 
-  static async addBlogPost(sub, blogData, { title, author }) {
+  static async addBlogPost(sub, blogData, { title, author, display }) {
     const producer = await ProducerUser.findOne({ sub });
     console.log("PRODUCER", producer)
-    producer.blog.unshift({ blogData, title, author })
+    producer.blog.unshift({ blogData, title, author, display })
+    return producer.save()
+  }
+
+  static async editBlogPost(sub, id, blogData, { title, author, display }) {
+    const producer = await ProducerUser.findOne({ sub })
+    producer.blog.id(id).blogData = blogData
+    producer.blog.id(id).title = title
+    producer.blog.id(id).author = author
+    producer.blog.id(id).display = display
+    producer.blog.id(id).modified = Date.now()
     return producer.save()
   }
 

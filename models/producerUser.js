@@ -8,7 +8,8 @@ const BlogSchema = new mongoose.Schema({
   created: { type: Date, default: Date.now },
   modified: { type: Date, default: Date.now },
   author: { type: String },
-  display: { type: Boolean }
+  display: { type: Boolean },
+  display: { type: Boolean, default: false }
 })
 
 const ProducerUserSchema = new mongoose.Schema({
@@ -19,7 +20,10 @@ const ProducerUserSchema = new mongoose.Schema({
   intro: { type: String },
   distributionAreas: {},
   stock: [StockSchema],
-  blog: [BlogSchema]
+  blog: [BlogSchema],
+  profileOptions: {
+    stockCategories: ['']
+  },
 });
 
 const ProducerUser = mongoose.model(

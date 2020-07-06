@@ -3,9 +3,9 @@ const RetailerStore = require('../stores/retailerStore');
 const UserStore = require('../stores/userStore');
 
 module.exports = class ProducerController {
-  static async findByProducerId(req, res, next) {
+  static async findById(req, res, next) {
     try {
-      const producer = await ProducerStore.findByProducerId(req.params.producerId);
+      const producer = await ProducerStore.findById(req.params.producerId);
       const user = await UserStore.findUser(producer.sub)
       console.log('PRODUCER RETRIEVED', producer, user);
       if (user && producer) {
@@ -23,9 +23,9 @@ module.exports = class ProducerController {
     }
   }
 
-  static async getProducers(req, res, next) {
+  static async getAll(req, res, next) {
     try {
-      const producers = await ProducerStore.getProducers()
+      const producers = await ProducerStore.getAll()
       return res.json(producers);
     } catch (err) {
       res.status(500).send({
@@ -36,11 +36,25 @@ module.exports = class ProducerController {
     }
   }
 
+  static async updateProfileOptions(req, res, next) {
+    try {
+      console.log(req.body)
+      const producer = await ProducerStore.updateProfileOptions(req.user.sub, req.body)
+      return res.json(producer.profile)
+    } catch (err) {
+      res.status(500).send({
+        message: 'Profile options update error',
+        error: err,
+      });
+      return next(err);
+    }
+  }
+
   static async updateStock(req, res, next) {
     try {
-      const user = await ProducerStore.updateStock(req.user.sub, req.body);
-      console.log(user.stock);
-      return res.json(user.stock);
+      const producer = await ProducerStore.updateStock(req.user.sub, req.body);
+      console.log(producer.stock);
+      return res.json(producer.stock);
     } catch (err) {
       res.status(500).send({
         message: 'Stock update error',
@@ -57,6 +71,19 @@ module.exports = class ProducerController {
     } catch (err) {
       res.status(500).send({
         message: 'Blog posting error',
+        error: err,
+      });
+      return next(err);
+    }
+  }
+
+  static async editBlogPost(req, res, next) {
+    try {
+      const producer = await ProducerStore.editBlogPost(req.user.sub, req.body.id, req.body.rawBlogData, req.body.blogMeta)
+      return res.json(producer)
+    } catch(err) {
+      res.status(500).send({
+        message: 'Blog edit error',
         error: err,
       });
       return next(err);
