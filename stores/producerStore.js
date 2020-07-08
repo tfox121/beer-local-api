@@ -23,6 +23,14 @@ module.exports = class UserStore {
     })
   }
 
+  static async updateProfile(sub, updates) {
+    return ProducerUser.findOneAndUpdate({ sub }, updates,
+      {
+        new: true,
+      },
+    );
+  }
+
   static async updateProfileOptions(sub, optionsChange) {
     const producer = await ProducerUser.findOne({ sub });
     producer.profileOptions[optionsChange.name] = optionsChange.payload
@@ -43,7 +51,6 @@ module.exports = class UserStore {
 
   static async addBlogPost(sub, blogData, { title, author, display }) {
     const producer = await ProducerUser.findOne({ sub });
-    console.log("PRODUCER", producer)
     producer.blog.unshift({ blogData, title, author, display })
     return producer.save()
   }
@@ -69,4 +76,11 @@ module.exports = class UserStore {
         new: true,
       },
     )
-  }};
+  }
+
+  static async addOrRemoveFollow(sub, follower) {
+    const producer = await ProducerUser.findOne({ sub })
+    producer.followingRetailers.unshift({ sub: follower })
+    return producer.save()
+  }
+};

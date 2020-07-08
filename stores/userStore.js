@@ -35,6 +35,19 @@ module.exports = class UserStore {
     );
   }
 
+  static async findUpdateUser(sub, updatedData) {
+    return User.findOneAndUpdate(
+      { sub },
+      {
+        ...updatedData,
+      },
+      {
+        new: true,
+        upsert: true,
+      },
+    );
+  }
+
   // add new PRODUCER user if they don't exist or update if they do
   static async findUpdateCreateProducerUser(sub, profileData) {
     return ProducerUser.findOneAndUpdate(
@@ -53,7 +66,6 @@ module.exports = class UserStore {
 
   // add new RETAILER user if they don't exist or update if they do
   static async findUpdateCreateRetailerUser(sub, profileData) {
-    console.log('FINDING', sub, profileData);
     return RetailerUser.findOneAndUpdate(
       { sub },
       {

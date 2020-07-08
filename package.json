@@ -9,6 +9,7 @@
     "express-jwt": "^5.3.3",
     "express-jwt-authz": "^2.4.0",
     "express-session": "^1.17.1",
+    "formidable": "^1.2.2",
     "ip": "1.1.5",
     "jwks-rsa": "^1.8.1",
     "minimist": "1.2.0",

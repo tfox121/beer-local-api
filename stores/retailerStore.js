@@ -18,4 +18,12 @@ module.exports = class RetailerStore {
     const newOrder = new Order({ retailerSub, producerSub, items })
     return newOrder.save();
   }
+
+  static async addOrRemoveFollow(sub, following) {
+    console.log(sub, following)
+    const retailer = await RetailerUser.findOne({ sub })
+    retailer.followedProducers.unshift({ sub: following })
+    console.log("RETAILER", retailer)
+    return retailer.save()
+  }
 };

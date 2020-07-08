@@ -5,15 +5,16 @@ const StockSchema = require('./stock')
 const BlogSchema = new mongoose.Schema({
   title: { type: String, required: true },
   blogData: { type: String, required: true },
-  created: { type: Date, default: Date.now },
-  modified: { type: Date, default: Date.now },
   author: { type: String },
-  display: { type: Boolean },
   display: { type: Boolean, default: false }
-})
+}, { timestamps: true })
+
+const FollowingRetailers = new mongoose.Schema({
+  sub: { type: String, required: true, index: { unique: true } },
+}, { timestamps: true })
 
 const ProducerUserSchema = new mongoose.Schema({
-  sub: { type: String, required: true },
+  sub: { type: String, required: true, index: { unique: true } },
   producerId: { type: String, required: true },
   salesEmail: { type: String, required: true },
   salesContactNumber: { type: String },
@@ -22,8 +23,9 @@ const ProducerUserSchema = new mongoose.Schema({
   stock: [StockSchema],
   blog: [BlogSchema],
   profileOptions: {
-    stockCategories: ['']
+    stockCategories: { type: Array, default: [''] }
   },
+  followingRetailers: [FollowingRetailers]
 });
 
 const ProducerUser = mongoose.model(

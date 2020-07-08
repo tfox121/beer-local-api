@@ -80,16 +80,20 @@ app.use(cors(corsOptions));
 
 // console.log(path.join(__dirname, 'public'))
 
-app.use(express.static('public'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// app.use(express.static('public')); << seems to prevent console logs.
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: false }));
 app.use(logger('dev'));
 
 const attachUser = async (req, res, next) => {
   if (req.user && req.user.sub) {
-    const user = await UserStore.findUser(req.user.sub)
-    if(user) {
-      req.role = user.role
+    try {
+      const user = await UserStore.findUser(req.user.sub)
+      if (user) {
+        req.role = user.role
+      }
+    } catch(err) {
+      next(err)
     }
   }
   next()

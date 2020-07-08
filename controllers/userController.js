@@ -1,12 +1,12 @@
 const multer = require('multer');
+const formidable = require('formidable');
 const path = require('path');
 const UserStore = require('../stores/userStore');
 const ProducerStore = require('../stores/producerStore');
 const RetailerStore = require('../stores/retailerStore');
 
 
-module.exports = class UserController {
-  static async findUser(req, res, next) {
+exports.findUser = async (req, res, next) => {
     try {
       console.log("FINDING USER", req.user)
       const user = await UserStore.findUser(req.user.sub);
@@ -22,7 +22,6 @@ module.exports = class UserController {
           return res.status(400).send({
             message: 'Invalid role',
           });
-          break
       }
       if (user && business) {
         return res.json({user, business});
@@ -39,7 +38,49 @@ module.exports = class UserController {
     }
   }
 
-  static async findUpdateCreateProducerUser(req, res, next) {
+  exports.findUpdateUser = async (req, res, next) => {
+    try {
+      const user = await UserStore.findUpdateUser(
+        req.user.sub,
+        req.body
+      )
+      let business
+
+      switch (req.role) {
+        case 'producer':
+          if (req.body.businessName) {
+            business = await ProducerStore.updateProfile(req.user.sub, { producerId: req.body.businessName.toLowerCase().replace(/\s+/g, '')})
+          } else {
+            business = await UserStore.findProducerUser(req.user.sub);
+          }
+          break;
+        case 'retailer':
+          if (req.body.businessName) {
+            business = await RetailerStore.updateProfile(req.user.sub, { retailerId: req.body.businessName.toLowerCase().replace(/\s+/g, '') })
+          } else {
+            business = await UserStore.findRetailerUser(req.user.sub)
+          }
+          break;
+        default:
+          return res.status(400).send({
+            message: 'Invalid role',
+          });
+      }
+      if (user && business) {
+        return res.json({ user, business });
+      }
+      return res.status(404).send({
+        message: 'User not found',
+      });
+    } catch (err) {
+      res.status(500).send({
+        message: 'User update error',
+      });
+      next(err);
+    }
+  }
+
+  exports.findUpdateCreateProducerUser = async (req, res, next) => {
     try {
       const user = await UserStore.findUpdateCreateUser(
         req.user.sub,
@@ -53,34 +94,49 @@ module.exports = class UserController {
       res.json({ user, business });
     } catch (err) {
       res.status(500).send({
-        message: 'User retrieval error',
+        message: 'User creation error',
       });
       next(err);
     }
   }
 
-  static async findUpdateCreateRetailerUser(req, res, next) {
+  exports.findUpdateCreateRetailerUser = async (req, res, next) => {
     try {
-      const user = await UserStore.findUpdateCreateUser(
-        req.user.sub,
-        req.body,
-        'retailer'
-      );
-      const business = await UserStore.findUpdateCreateRetailerUser(
-        req.user.sub,
-        req.body,
-      );
-      console.log('RETAILER USER CREATED', user, business);
-      res.json({ user, business });
+      console.log("REQ BODY", req.body)
+      // const form = formidable({ multiples: true });
+
+      // form.parse(req, (err, fields, files) => {
+      //   if (err) {
+      //     console.log(err)
+      //     next(err);
+      //     return;
+      //   }
+      //   // res.json({ fields, files });
+      //   console.log(fields)
+      // });
+      res.send('Success!')
+
+      // const user = await UserStore.findUpdateCreateUser(
+      //   req.user.sub,
+      //   req.body,
+      //   'retailer'
+      // );
+      // const business = await UserStore.findUpdateCreateRetailerUser(
+      //   req.user.sub,
+      //   req.body,
+      // );
+      // res.json({ user, business });
     } catch (err) {
-      res.status(500).send({
-        message: 'User retrieval error',
+      console.error(err)
+
+      res.status(500).json({
+        message: 'User creation error',
       });
       next(err);
     }
   }
 
-  static async avatarUpload(req, res, next) {
+  exports.avatarUpload = async (req, res, next) => {
     try {
       const storage = multer.diskStorage({
         destination(req_, file, cb) {
@@ -118,7 +174,7 @@ module.exports = class UserController {
     }
   }
 
-  static async getOrders(req, res, next) {
+  exports.getOrders = async (req, res, next) => {
     try {
       console.log("ROLE", req.role)
       const orders = await UserStore.getOrders(req.user.sub, req.role);
@@ -128,7 +184,6 @@ module.exports = class UserController {
             const purchaser = await RetailerStore.findBySub(order.retailerSub)
             return purchaser
           }))
-          console.log("PURCHASER", purchasers)
           return res.json({ orders: orders.reverse(), businesses: purchasers.reverse() });
         }
         if (req.role === 'retailer') {
@@ -136,7 +191,6 @@ module.exports = class UserController {
             const producer = await ProducerStore.findBySub(order.producerSub)
             return producer
           }))
-          console.log(producers)
           return res.json({ orders: orders.reverse(), businesses: producers.reverse() });
         }
       }
@@ -152,7 +206,23 @@ module.exports = class UserController {
     }
   }
 
-  // static async findUpdateCreateUser(req, res, next) {
+  exports.addOrRemoveFollow = async (req, res, next) => {
+    try {
+      // console.log("FOLLOW", req.user.sub, req.body.follow)
+      const retailer = await RetailerStore.addOrRemoveFollow(req.user.sub, req.body.follow)
+      const producer = await ProducerStore.addOrRemoveFollow(req.body.follow, req.user.sub)
+      return res.json(retailer)
+      // res.send('Success!')
+    } catch (err) {
+      res.status(500).send({
+        message: 'Follow add error',
+        error: err,
+      });
+      return next(err);
+    }
+  }
+
+  // exports.findUpdateCreateUser = async (req, res, next) => {
   //   try {
   //     const user = await UserStore.findUpdateCreateUser(req.body);
   //     console.log('USER RETRIEVED', user);
@@ -164,4 +234,3 @@ module.exports = class UserController {
   //     next(err);
   //   }
   // }
-};

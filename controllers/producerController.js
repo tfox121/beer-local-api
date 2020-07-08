@@ -1,5 +1,4 @@
 const ProducerStore = require('../stores/producerStore');
-const RetailerStore = require('../stores/retailerStore');
 const UserStore = require('../stores/userStore');
 
 module.exports = class ProducerController {
@@ -7,7 +6,7 @@ module.exports = class ProducerController {
     try {
       const producer = await ProducerStore.findById(req.params.producerId);
       const user = await UserStore.findUser(producer.sub)
-      console.log('PRODUCER RETRIEVED', producer, user);
+      console.log('PRODUCER RETRIEVED');
       if (user && producer) {
         return res.json({ producer, user });
       }
@@ -38,12 +37,33 @@ module.exports = class ProducerController {
 
   static async updateProfileOptions(req, res, next) {
     try {
-      console.log(req.body)
+      // console.log(req.body)
       const producer = await ProducerStore.updateProfileOptions(req.user.sub, req.body)
-      return res.json(producer.profile)
+      const user = await UserStore.findUser(producer.sub)
+      console.log("PROFILE")
+      if (user && producer) {
+        return res.json({ producer, user });
+      }
     } catch (err) {
       res.status(500).send({
         message: 'Profile options update error',
+        error: err,
+      });
+      return next(err);
+    }
+  }
+
+  static async updateProfile(req, res, next) {
+    console.log("UPDATING PROFILE")
+    try {
+      const producer = await ProducerStore.updateProfile(req.user.sub, req.body)
+      const user = await UserStore.findUser(producer.sub)
+      if (user && producer) {
+        return res.json({ producer, user });
+      }
+    } catch (err) {
+      res.status(500).send({
+        message: 'Profile update error',
         error: err,
       });
       return next(err);
