@@ -14,4 +14,4 @@ const StockSchema = new mongoose.Schema({
   orderQuant: { type: Number },
 }, { timestamps: true });
 
-module.exports = StockSchema
+module.exports = StockSchema;

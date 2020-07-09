@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
-const StockSchema = require('./stock')
+const StockSchema = require('./stock');
 
 const OrderSchema = new mongoose.Schema({
   orderNumber: { type: Number },
@@ -12,7 +12,6 @@ const OrderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 OrderSchema.plugin(AutoIncrement, { inc_field: 'orderNumber' });
-
 
 const Order = mongoose.model('Order', OrderSchema, 'order');
 

@@ -2,13 +2,23 @@ const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
   sub: { type: String, required: true, index: { unique: true } },
+  businessName: { type: String, required: true, index: { unique: true } },
+  businessId: { type: String, required: true, index: { unique: true } },
   role: { type: String, required: true },
-  businessName: { type: String, required: true },
   website: { type: String },
-  avatarSource: { type: String },
-  bannerSource: { type: String },
-  location: {},
-  address: { type: String },
+  avatarSource: {
+    data: Buffer,
+    contentType: String,
+  },
+  bannerSource: {
+    data: Buffer,
+    contentType: String,
+  },
+  location: {
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true },
+  },
+  address: { type: String, required: true },
   terms: { type: Boolean, required: true },
 }, { timestamps: true });
 

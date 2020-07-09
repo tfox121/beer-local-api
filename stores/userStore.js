@@ -1,12 +1,22 @@
-const User = require('../models/user')
+const User = require('../models/user');
 const ProducerUser = require('../models/producerUser');
 const RetailerUser = require('../models/retailerUser');
-const Order = require('../models/order') 
+const Order = require('../models/order');
 
 module.exports = class UserStore {
   // find user according to id
   static async findUser(sub) {
-    return User.findOne({ sub });
+    return User.findOne({ sub }).select('-avatarSource -bannerSource');
+  }
+
+  static async getAvatar(sub) {
+    const user = await User.findOne({ sub });
+    return user.avatarSource;
+  }
+
+  static async getBanner(sub) {
+    const user = await User.findOne({ sub });
+    return user.bannerSource;
   }
 
   static async findProducerUser(sub) {
@@ -19,20 +29,18 @@ module.exports = class UserStore {
 
   static async findUpdateCreateUser(sub, profileData, role) {
     return User.findOneAndUpdate(
-      {sub},
+      { sub },
       {
         sub,
         role,
+        businessId: profileData.businessName.toLowerCase().replace(/[^\w]/g, ''),
         ...profileData,
-        avatarSource: profileData.avatar
-          ? `/images/avatars/${sub}-profile.${profileData.pictureFileExt}`
-          : `/images/avatars/blank-profile.webp`,
       },
       {
         new: true,
         upsert: true,
       },
-    );
+    ).select('-avatarSource -bannerSource');
   }
 
   static async findUpdateUser(sub, updatedData) {
@@ -40,12 +48,13 @@ module.exports = class UserStore {
       { sub },
       {
         ...updatedData,
+        businessId: updatedData.businessName.toLowerCase().replace(/[^\w]/g, ''),
       },
       {
         new: true,
-        upsert: true,
+        upsert: false,
       },
-    );
+    ).select('-avatarSource -bannerSource');
   }
 
   // add new PRODUCER user if they don't exist or update if they do
@@ -55,7 +64,7 @@ module.exports = class UserStore {
       {
         sub,
         ...profileData,
-        producerId: profileData.businessName.toLowerCase().replace(/\s+/g, ''),
+        businessId: profileData.businessName.toLowerCase().replace(/[^\w]/g, ''),
       },
       {
         new: true,
@@ -71,7 +80,7 @@ module.exports = class UserStore {
       {
         sub,
         ...profileData,
-        retailerId: profileData.businessName.toLowerCase().replace(/\s+/g, ''),
+        businessId: profileData.businessName.toLowerCase().replace(/[^\w]/g, ''),
       },
       {
         new: true,
@@ -81,8 +90,7 @@ module.exports = class UserStore {
   }
 
   static async getOrders(sub, role) {
-    console.log("Role", role)
-    return Order.find({ [`${role}Sub`]: sub })
+    console.log('Role', role);
+    return Order.find({ [`${role}Sub`]: sub });
   }
-
 };

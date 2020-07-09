@@ -1,236 +1,289 @@
 const multer = require('multer');
-const formidable = require('formidable');
+const fs = require('fs');
 const path = require('path');
 const UserStore = require('../stores/userStore');
 const ProducerStore = require('../stores/producerStore');
 const RetailerStore = require('../stores/retailerStore');
 
-
-exports.findUser = async (req, res, next) => {
-    try {
-      console.log("FINDING USER", req.user)
-      const user = await UserStore.findUser(req.user.sub);
-      let business
-      switch (req.role) {
-        case 'producer':
-          business = await UserStore.findProducerUser(req.user.sub);
-          break;
-        case 'retailer':
-          business = await UserStore.findRetailerUser(req.user.sub)
-          break;
-        default:
-          return res.status(400).send({
-            message: 'Invalid role',
-          });
-      }
-      if (user && business) {
-        return res.json({user, business});
-      }
-      return res.status(404).send({
-        message: 'User not found',
-      });
-    } catch (err) {
-      res.status(500).send({
-        message: 'User retrieval error',
-        error: err,
-      });
-      return next(err);
+exports.findUser = async (req, res) => {
+  try {
+    console.log('FINDING USER', req.user);
+    const user = await UserStore.findUser(req.user.sub);
+    let business;
+    switch (req.role) {
+      case 'producer':
+        business = await UserStore.findProducerUser(req.user.sub);
+        break;
+      case 'retailer':
+        business = await UserStore.findRetailerUser(req.user.sub);
+        break;
+      default:
+        res.status(400).json({
+          message: 'Invalid role',
+        });
     }
-  }
-
-  exports.findUpdateUser = async (req, res, next) => {
-    try {
-      const user = await UserStore.findUpdateUser(
-        req.user.sub,
-        req.body
-      )
-      let business
-
-      switch (req.role) {
-        case 'producer':
-          if (req.body.businessName) {
-            business = await ProducerStore.updateProfile(req.user.sub, { producerId: req.body.businessName.toLowerCase().replace(/\s+/g, '')})
-          } else {
-            business = await UserStore.findProducerUser(req.user.sub);
-          }
-          break;
-        case 'retailer':
-          if (req.body.businessName) {
-            business = await RetailerStore.updateProfile(req.user.sub, { retailerId: req.body.businessName.toLowerCase().replace(/\s+/g, '') })
-          } else {
-            business = await UserStore.findRetailerUser(req.user.sub)
-          }
-          break;
-        default:
-          return res.status(400).send({
-            message: 'Invalid role',
-          });
-      }
-      if (user && business) {
-        return res.json({ user, business });
-      }
-      return res.status(404).send({
-        message: 'User not found',
-      });
-    } catch (err) {
-      res.status(500).send({
-        message: 'User update error',
-      });
-      next(err);
-    }
-  }
-
-  exports.findUpdateCreateProducerUser = async (req, res, next) => {
-    try {
-      const user = await UserStore.findUpdateCreateUser(
-        req.user.sub,
-        req.body,
-        'producer'
-      );
-      const business = await UserStore.findUpdateCreateProducerUser(
-        req.user.sub,
-        req.body,
-      );
+    if (user && business) {
       res.json({ user, business });
-    } catch (err) {
-      res.status(500).send({
-        message: 'User creation error',
-      });
-      next(err);
     }
+    res.status(404).json({
+      message: 'User not found',
+    });
+  } catch (err) {
+    res.status(500).send({
+      message: 'User retrieval error',
+      error: err,
+    });
   }
+};
 
-  exports.findUpdateCreateRetailerUser = async (req, res, next) => {
-    try {
-      console.log("REQ BODY", req.body)
-      // const form = formidable({ multiples: true });
+exports.getOwnAvatar = async (req, res) => {
+  try {
+    const avatar = await UserStore.getAvatar(req.user.sub);
+    res.set('Content-Type', avatar.contentType);
+    res.send(avatar.data);
+  } catch (err) {
+    res.status(500).json({
+      message: 'Avatar retrieval error',
+      error: err,
+    });
+  }
+};
 
-      // form.parse(req, (err, fields, files) => {
-      //   if (err) {
-      //     console.log(err)
-      //     next(err);
-      //     return;
-      //   }
-      //   // res.json({ fields, files });
-      //   console.log(fields)
-      // });
-      res.send('Success!')
+exports.getOwnBanner = async (req, res) => {
+  try {
+    const banner = await UserStore.getBanner(req.user.sub);
+    res.set('Content-Type', banner.contentType);
+    res.send(banner.data);
+  } catch (err) {
+    res.status(500).json({
+      message: 'Banner retrieval error',
+      error: err,
+    });
+  }
+};
 
-      // const user = await UserStore.findUpdateCreateUser(
-      //   req.user.sub,
-      //   req.body,
-      //   'retailer'
-      // );
-      // const business = await UserStore.findUpdateCreateRetailerUser(
-      //   req.user.sub,
-      //   req.body,
-      // );
-      // res.json({ user, business });
-    } catch (err) {
-      console.error(err)
+exports.findUpdateUser = async (req, res) => {
+  try {
+    const userObj = { ...req.fields };
+    console.log(userObj);
 
-      res.status(500).json({
-        message: 'User creation error',
-      });
-      next(err);
+    if (req.files.avatarSource) {
+      userObj.avatarSource = {};
+      userObj.avatarSource.data = fs.readFileSync(req.files.avatarSource.path);
+      userObj.avatarSource.contentType = req.files.avatarSource.type;
     }
-  }
 
-  exports.avatarUpload = async (req, res, next) => {
-    try {
-      const storage = multer.diskStorage({
-        destination(req_, file, cb) {
-          cb(null, 'public/images/avatars');
-        },
-        filename(req_, file, cb) {
-          console.log('FILENAME', req_.user);
-          cb(
-            null,
-            `${req_.user.sub}-profile${path.extname(file.originalname)}`,
-          );
-        },
-      });
-
-      const upload = multer({ storage }).single('myImage');
-
-      upload(req, res, err => {
-        if (err) {
-          console.error(err);
-          res.status(500).send({
-            message: 'File upload error',
-          });
-          return next(err);
-        }
-        console.log('Request ---', req.body);
-        console.log('Request file ---', req.file);
-
-        if (!err) res.status(200).json(req.file);
-      });
-    } catch (err) {
-      res.status(500).send({
-        message: 'File upload error',
-      });
-      next(err);
+    if (req.files.bannerSource) {
+      userObj.bannerSource = {};
+      userObj.bannerSource.data = fs.readFileSync(req.files.bannerSource.path);
+      userObj.bannerSource.contentType = req.files.bannerSource.type;
     }
-  }
 
-  exports.getOrders = async (req, res, next) => {
-    try {
-      console.log("ROLE", req.role)
-      const orders = await UserStore.getOrders(req.user.sub, req.role);
-      if (orders || orders.length) {
-        if (req.role === 'producer') {
-          const purchasers = await Promise.all(orders.map(async (order) => {
-            const purchaser = await RetailerStore.findBySub(order.retailerSub)
-            return purchaser
-          }))
-          return res.json({ orders: orders.reverse(), businesses: purchasers.reverse() });
+    const user = await UserStore.findUpdateUser(
+      req.user.sub,
+      userObj,
+    );
+
+    console.log('USER UPDATED', user);
+
+    let business;
+
+    switch (req.role) {
+      case 'producer':
+        if (req.body.businessName) {
+          business = await ProducerStore.updateProfile(req.user.sub, { businessId: req.fields.businessName.toLowerCase().replace(/[^\w]/g, '') });
+        } else {
+          business = await UserStore.findProducerUser(req.user.sub);
         }
-        if (req.role === 'retailer') {
-          const producers = await Promise.all(orders.map(async (order) => {
-            const producer = await ProducerStore.findBySub(order.producerSub)
-            return producer
-          }))
-          return res.json({ orders: orders.reverse(), businesses: producers.reverse() });
+        break;
+      case 'retailer':
+        if (req.body.businessName) {
+          business = await RetailerStore.updateProfile(req.user.sub, { businessId: req.fields.businessName.toLowerCase().replace(/[^\w]/g, '') });
+        } else {
+          business = await UserStore.findRetailerUser(req.user.sub);
         }
+        break;
+      default:
+        res.status(400).send({
+          message: 'Invalid role',
+        });
+    }
+    if (user && business) {
+      res.json({ user, business });
+    } else {
+      res.status(404).send({
+        message: 'User not found',
+      });
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: 'User update error',
+    });
+  }
+};
+
+exports.findUpdateCreateProducerUser = async (req, res) => {
+  try {
+    console.log('FIELDS', req.fields);
+    console.log('FILES', req.files);
+    const userObj = { ...req.fields };
+
+    if (req.fields.location) {
+      userObj.location = JSON.parse(req.fields.location);
+    }
+    if (req.fields.distributionAreas) {
+      userObj.distributionAreas = JSON.parse(req.fields.distributionAreas);
+    }
+
+    userObj.avatarSource = {};
+
+    userObj.avatarSource.data = fs.readFileSync(req.files.pictureFile.path);
+
+    userObj.avatarSource.contentType = req.files.pictureFile.type;
+    const user = await UserStore.findUpdateCreateUser(
+      req.user.sub,
+      userObj,
+      'producer',
+    );
+    const business = await UserStore.findUpdateCreateProducerUser(
+      req.user.sub,
+      userObj,
+    );
+    res.json({ user, business });
+  } catch (err) {
+    res.status(500).send({
+      message: 'User creation error',
+    });
+  }
+};
+
+exports.findUpdateCreateRetailerUser = async (req, res) => {
+  try {
+    const userObj = { ...req.fields };
+
+    if (req.fields.location) {
+      userObj.location = JSON.parse(req.fields.location);
+    }
+    if (req.fields.contactOptions) {
+      userObj.contactOptions = JSON.parse(req.fields.contactOptions);
+    }
+
+    userObj.avatarSource = {};
+    userObj.avatarSource.data = fs.readFileSync(req.files.pictureFile.path);
+    userObj.avatarSource.contentType = req.files.pictureFile.type;
+
+    console.log(userObj);
+    const user = await UserStore.findUpdateCreateUser(
+      req.user.sub,
+      userObj,
+      'retailer',
+    );
+    console.log(user);
+
+    const business = await UserStore.findUpdateCreateRetailerUser(
+      req.user.sub,
+      userObj,
+    );
+    console.log(business);
+    res.json({ user, business });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      message: 'User creation error',
+    });
+  }
+};
+
+exports.avatarUpload = async (req, res) => {
+  try {
+    const storage = multer.diskStorage({
+      destination(req_, file, cb) {
+        cb(null, 'public/images/avatars');
+      },
+      filename(req_, file, cb) {
+        console.log('FILENAME', req_.user);
+        cb(
+          null,
+          `${req_.user.sub}-profile${path.extname(file.originalname)}`,
+        );
+      },
+    });
+
+    const upload = multer({ storage }).single('myImage');
+
+    upload(req, res, (err) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send({
+          message: 'File upload error',
+        });
       }
-      return res.status(404).send({
-        message: 'No orders found'
-      })
-    } catch (err) {
-      res.status(500).send({
-        message: 'Order fetch error',
-        error: err,
-      });
-      return next(err);
-    }
-  }
+      console.log('Request ---', req.body);
+      console.log('Request file ---', req.file);
 
-  exports.addOrRemoveFollow = async (req, res, next) => {
-    try {
-      // console.log("FOLLOW", req.user.sub, req.body.follow)
-      const retailer = await RetailerStore.addOrRemoveFollow(req.user.sub, req.body.follow)
-      const producer = await ProducerStore.addOrRemoveFollow(req.body.follow, req.user.sub)
-      return res.json(retailer)
-      // res.send('Success!')
-    } catch (err) {
-      res.status(500).send({
-        message: 'Follow add error',
-        error: err,
-      });
-      return next(err);
-    }
+      if (!err) res.status(200).json(req.file);
+    });
+  } catch (err) {
+    res.status(500).send({
+      message: 'File upload error',
+    });
   }
+};
 
-  // exports.findUpdateCreateUser = async (req, res, next) => {
-  //   try {
-  //     const user = await UserStore.findUpdateCreateUser(req.body);
-  //     console.log('USER RETRIEVED', user);
-  //     res.json(user);
-  //   } catch (err) {
-  //     res.status(500).send({
-  //       message: 'User retrieval error',
-  //     });
-  //     next(err);
-  //   }
-  // }
+exports.getOrders = async (req, res) => {
+  try {
+    console.log('ROLE', req.role);
+    const orders = await UserStore.getOrders(req.user.sub, req.role);
+    if (orders || orders.length) {
+      if (req.role === 'producer') {
+        const purchasers = await Promise.all(orders.map(async (order) => {
+          const purchaser = await RetailerStore.findBySub(order.retailerSub);
+          return purchaser;
+        }));
+        res.json({ orders: orders.reverse(), businesses: purchasers.reverse() });
+      }
+      if (req.role === 'retailer') {
+        const producers = await Promise.all(orders.map(async (order) => {
+          const producer = await ProducerStore.findBySub(order.producerSub);
+          return producer;
+        }));
+        res.json({ orders: orders.reverse(), businesses: producers.reverse() });
+      }
+    }
+    res.status(404).json({
+      message: 'No orders found',
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: 'Order fetch error',
+      error: err,
+    });
+  }
+};
+
+exports.addOrRemoveFollow = async (req, res) => {
+  try {
+    const retailer = await RetailerStore.addOrRemoveFollow(req.user.sub, req.body.follow);
+    await ProducerStore.addOrRemoveFollow(req.body.follow, req.user.sub);
+    res.json(retailer);
+  } catch (err) {
+    res.status(500).send({
+      message: 'Follow add error',
+      error: err,
+    });
+  }
+};
+
+// exports.findUpdateCreateUser = async (req, res, next) => {
+//   try {
+//     const user = await UserStore.findUpdateCreateUser(req.body);
+//     console.log('USER RETRIEVED', user);
+//     res.json(user);
+//   } catch (err) {
+//     res.status(500).send({
+//       message: 'User retrieval error',
+//     });
+//     next(err);
+//   }
+// }

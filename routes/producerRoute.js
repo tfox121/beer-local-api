@@ -14,6 +14,4 @@ router.patch('/blog', ProducerController.editBlogPost);
 
 router.patch('/orders', ProducerController.editOrderStatus);
 
-
-
 module.exports = router;
