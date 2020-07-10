@@ -20,6 +20,8 @@ router.post('/avatar', UserController.avatarUpload);
 
 router.get('/orders', UserController.getOrders);
 
+router.patch('/orders', UserController.editOrder);
+
 router.patch('/follow', UserController.addOrRemoveFollow);
 
 module.exports = router;

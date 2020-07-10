@@ -135,15 +135,3 @@ exports.editBlogPost = async (req, res) => {
     });
   }
 };
-
-exports.editOrderStatus = async (req, res) => {
-  try {
-    const order = await ProducerStore.editOrderStatus(req.body);
-    res.json(order);
-  } catch (err) {
-    res.status(500).json({
-      message: 'Order update error',
-      error: err,
-    });
-  }
-};

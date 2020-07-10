@@ -71,17 +71,6 @@ exports.editBlogPost = async (sub, id, blogData, { title, author, display }) => 
   return producer.save();
 };
 
-exports.editOrderStatus = async ({ _id, status }) => Order.findOneAndUpdate(
-  { _id },
-  {
-    status,
-    modified: Date.now(),
-  },
-  {
-    new: true,
-  },
-);
-
 exports.addOrRemoveFollow = async (sub, follower) => {
   const producer = await ProducerUser.findOne({ sub });
   const follow = producer.followingRetailers.filter((retailer) => retailer.sub === follower);
