@@ -2,9 +2,13 @@
 const User = require('../models/user');
 const ProducerUser = require('../models/producerUser');
 const RetailerUser = require('../models/retailerUser');
-const Order = require('../models/order');
 
 exports.findUser = async (sub) => User.findOne({ sub }).select('-avatarSource -bannerSource');
+
+exports.getBusinessName = async (sub) => {
+  const user = await User.findOne({ sub });
+  return user.businessName;
+};
 
 exports.getAvatar = async (sub) => {
   const user = await User.findOne({ sub });
@@ -74,15 +78,21 @@ exports.findUpdateCreateRetailerUser = async (sub, profileData) => RetailerUser.
   },
 );
 
-exports.getOrders = async (sub, role) => {
-  console.log('Role', role);
-  return Order.find({ [`${role}Sub`]: sub });
+exports.addNotification = async (sub, type, resourceId, from) => {
+  const user = await User.findOne({ sub });
+  const duplicatedNotification = user.notifications.filter(
+    (notification) => notification.resourceId === resourceId.toString()
+      && notification.type === type && !notification.read,
+  );
+  if (duplicatedNotification.length) {
+    user.notifications.id(duplicatedNotification[0]._id).remove();
+  }
+  user.notifications.unshift({ type, resourceId, from });
+  return user.save();
 };
 
-exports.editOrder = async (orderChanges) => Order.findOneAndUpdate(
-  { _id: orderChanges._id },
-  orderChanges,
-  {
-    new: true,
-  },
-);
+exports.dismissNotification = async (sub, id) => {
+  const user = await User.findOne({ sub });
+  user.notifications.id(id).read = true;
+  return user.save();
+};

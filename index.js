@@ -13,6 +13,7 @@ const app = express();
 
 const UserStore = require('./stores/userStore');
 const UserRoute = require('./routes/userRoute');
+const OrderRoute = require('./routes/orderRoute');
 const PublicRoute = require('./routes/publicRoute');
 const ProducerRoute = require('./routes/producerRoute');
 const RetailerRoute = require('./routes/retailerRoute');
@@ -118,6 +119,7 @@ const attachUser = async (req, res, next) => {
 
 // Routes
 app.use('/api/private/user', checkJwt, attachUser, UserRoute);
+app.use('/api/private/orders', checkJwt, attachUser, OrderRoute);
 app.use('/api/private/producer', checkJwt, attachUser, ProducerRoute);
 app.use('/api/private/retailer', checkJwt, attachUser, RetailerRoute);
 app.use('/api', PublicRoute);

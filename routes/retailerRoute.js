@@ -1,7 +1,5 @@
 const router = require('express').Router();
 
-const RetailerController = require('../controllers/retailerController');
-
-router.post('/order', RetailerController.placeOrder);
+// const RetailerController = require('../controllers/retailerController');
 
 module.exports = router;

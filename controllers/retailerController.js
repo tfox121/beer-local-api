@@ -19,19 +19,4 @@ module.exports = class RetailerController {
       return next(err);
     }
   }
-
-  static async placeOrder(req, res, next) {
-    try {
-      const newOrder = await RetailerStore.placeOrder(
-        req.user.sub, req.body.producerSub, req.body.orderItems,
-      );
-      return res.json(newOrder);
-    } catch (err) {
-      res.status(500).send({
-        message: 'Order placement error',
-        error: err,
-      });
-      return next(err);
-    }
-  }
 };

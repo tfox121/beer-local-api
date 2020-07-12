@@ -18,10 +18,8 @@ router.post('/retailer', UserController.findUpdateCreateRetailerUser);
 
 router.post('/avatar', UserController.avatarUpload);
 
-router.get('/orders', UserController.getOrders);
-
-router.patch('/orders', UserController.editOrder);
-
 router.patch('/follow', UserController.addOrRemoveFollow);
+
+router.patch('/notification/:id', UserController.notificationDismiss);
 
 module.exports = router;

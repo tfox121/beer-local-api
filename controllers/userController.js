@@ -9,6 +9,13 @@ exports.findUser = async (req, res) => {
   try {
     console.log('FINDING USER', req.user);
     const user = await UserStore.findUser(req.user.sub);
+
+    const notifications = await Promise.all(user.notifications.map(async (notification) => ({
+      ...notification._doc,
+      image: await UserStore.getAvatar(notification._doc.from),
+      name: await UserStore.getBusinessName(notification._doc.from),
+    })));
+
     let business;
     switch (req.role) {
       case 'producer':
@@ -23,11 +30,12 @@ exports.findUser = async (req, res) => {
         });
     }
     if (user && business) {
-      res.json({ user, business });
+      res.json({ user: { ...user, notifications }, business });
+    } else {
+      res.status(404).json({
+        message: 'User not found',
+      });
     }
-    res.status(404).json({
-      message: 'User not found',
-    });
   } catch (err) {
     res.status(500).send({
       message: 'User retrieval error',
@@ -231,50 +239,6 @@ exports.avatarUpload = async (req, res) => {
   }
 };
 
-exports.getOrders = async (req, res) => {
-  try {
-    console.log('ROLE', req.role);
-    const orders = await UserStore.getOrders(req.user.sub, req.role);
-    if (orders || orders.length) {
-      if (req.role === 'producer') {
-        const purchasers = await Promise.all(orders.map(async (order) => {
-          const purchaser = await RetailerStore.findBySub(order.retailerSub);
-          return purchaser;
-        }));
-        res.json({ orders: orders.reverse(), businesses: purchasers.reverse() });
-      }
-      if (req.role === 'retailer') {
-        const producers = await Promise.all(orders.map(async (order) => {
-          const producer = await ProducerStore.findBySub(order.producerSub);
-          return producer;
-        }));
-        res.json({ orders: orders.reverse(), businesses: producers.reverse() });
-      }
-    } else {
-      res.status(404).json({
-        message: 'No orders found',
-      });
-    }
-  } catch (err) {
-    res.status(500).json({
-      message: 'Order fetch error',
-      error: err,
-    });
-  }
-};
-
-exports.editOrder = async (req, res) => {
-  try {
-    const order = await UserStore.editOrder(req.body);
-    res.json(order);
-  } catch (err) {
-    res.status(500).json({
-      message: 'Order update error',
-      error: err,
-    });
-  }
-};
-
 exports.addOrRemoveFollow = async (req, res) => {
   try {
     const retailer = await RetailerStore.addOrRemoveFollow(req.user.sub, req.body.follow);
@@ -283,6 +247,18 @@ exports.addOrRemoveFollow = async (req, res) => {
   } catch (err) {
     res.status(500).send({
       message: 'Follow add error',
+      error: err,
+    });
+  }
+};
+
+exports.notificationDismiss = async (req, res) => {
+  try {
+    const user = await UserStore.dismissNotification(req.user.sub, req.params.id);
+    res.json(user);
+  } catch (err) {
+    res.status(500).send({
+      message: 'Notification dismiss error',
       error: err,
     });
   }
