@@ -107,6 +107,7 @@ exports.addOrderMessage = async (req, res) => {
       req.body,
     );
     const notifiedSub = req.role === 'producer' ? order.retailerSub : order.producerSub;
+    OrderStore.editOrder(req.params.orderId, req.role === 'producer' ? { retailerNotification: true } : { producerNotification: true });
 
     UserStore.addNotification(
       notifiedSub,

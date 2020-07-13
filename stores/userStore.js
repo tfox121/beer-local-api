@@ -96,3 +96,11 @@ exports.dismissNotification = async (sub, id) => {
   user.notifications.id(id).read = true;
   return user.save();
 };
+
+exports.notificationsDismiss = async (sub) => {
+  const user = await User.findOne({ sub });
+  user.notifications.forEach((notification) => {
+    notification.read = true;
+  });
+  return user.save();
+};

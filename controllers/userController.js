@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
@@ -30,7 +31,7 @@ exports.findUser = async (req, res) => {
         });
     }
     if (user && business) {
-      res.json({ user: { ...user, notifications }, business });
+      res.json({ user: { ...user._doc, notifications }, business });
     } else {
       res.status(404).json({
         message: 'User not found',
@@ -259,6 +260,23 @@ exports.notificationDismiss = async (req, res) => {
   } catch (err) {
     res.status(500).send({
       message: 'Notification dismiss error',
+      error: err,
+    });
+  }
+};
+
+exports.notificationsDismiss = async (req, res) => {
+  try {
+    const user = await UserStore.notificationsDismiss(req.user.sub);
+    const notifications = await Promise.all(user.notifications.map(async (notification) => ({
+      ...notification._doc,
+      image: await UserStore.getAvatar(notification._doc.from),
+      name: await UserStore.getBusinessName(notification._doc.from),
+    })));
+    res.json({ ...user._doc, notifications });
+  } catch (err) {
+    res.status(500).send({
+      message: 'Notifications dismiss error',
       error: err,
     });
   }

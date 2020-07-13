@@ -22,4 +22,6 @@ router.patch('/follow', UserController.addOrRemoveFollow);
 
 router.patch('/notification/:id', UserController.notificationDismiss);
 
+router.patch('/notifications', UserController.notificationsDismiss);
+
 module.exports = router;
