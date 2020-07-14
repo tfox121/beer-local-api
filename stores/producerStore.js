@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const ProducerUser = require('../models/producerUser');
 const User = require('../models/user');
-const Order = require('../models/order');
 
 exports.findById = async (businessId) => ProducerUser.findOne({ businessId });
 
@@ -40,6 +39,19 @@ exports.updateProfile = async (sub, updates) => ProducerUser.findOneAndUpdate({ 
 exports.updateProfileOptions = async (sub, optionsChange) => {
   const producer = await ProducerUser.findOne({ sub });
   producer.profileOptions[optionsChange.name] = optionsChange.payload;
+  return producer.save();
+};
+
+exports.addPromotion = async (sub, promotion) => {
+  const producer = await ProducerUser.findOne({ sub });
+  console.log(promotion);
+  producer.promotions.unshift(promotion);
+  return producer.save();
+};
+
+exports.deletePromotion = async (sub, promotionId) => {
+  const producer = await ProducerUser.findOne({ sub });
+  producer.promotions.id(promotionId).remove();
   return producer.save();
 };
 

@@ -82,7 +82,7 @@ exports.addNotification = async (sub, type, resourceId, from) => {
   const user = await User.findOne({ sub });
   const duplicatedNotification = user.notifications.filter(
     (notification) => notification.resourceId === resourceId.toString()
-      && notification.type === type && !notification.read,
+      && notification.type === type,
   );
   if (duplicatedNotification.length) {
     user.notifications.id(duplicatedNotification[0]._id).remove();

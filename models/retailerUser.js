@@ -1,16 +1,17 @@
 const mongoose = require('mongoose');
 
-const FollowedProducers = new mongoose.Schema({
+const FollowedProducerSchema = new mongoose.Schema({
   sub: { type: String, required: true, unique: true },
 }, { timestamps: true });
 
 const RetailerUserSchema = new mongoose.Schema({
   sub: { type: String, required: true, index: { unique: true } },
   businessId: { type: String, required: true },
+  primaryContactName: { type: String, required: true },
   purchasingEmail: { type: String, required: true },
   purchasingContactNumber: { type: String, required: true },
   contactOptions: {},
-  followedProducers: [FollowedProducers],
+  followedProducers: [FollowedProducerSchema],
 });
 
 const RetailerUser = mongoose.model(

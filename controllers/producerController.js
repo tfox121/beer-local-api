@@ -58,6 +58,22 @@ exports.getAll = async (req, res) => {
   }
 };
 
+exports.updateProfile = async (req, res) => {
+  console.log('UPDATING PROFILE');
+  try {
+    const producer = await ProducerStore.updateProfile(req.user.sub, req.body);
+    const user = await UserStore.findUser(producer.sub);
+    if (user && producer) {
+      res.json({ producer, user });
+    }
+  } catch (err) {
+    res.status(500).json({
+      message: 'Profile update error',
+      error: err,
+    });
+  }
+};
+
 exports.updateProfileOptions = async (req, res) => {
   try {
     // console.log(req.body)
@@ -75,17 +91,26 @@ exports.updateProfileOptions = async (req, res) => {
   }
 };
 
-exports.updateProfile = async (req, res) => {
-  console.log('UPDATING PROFILE');
+exports.addPromotion = async (req, res) => {
   try {
-    const producer = await ProducerStore.updateProfile(req.user.sub, req.body);
-    const user = await UserStore.findUser(producer.sub);
-    if (user && producer) {
-      res.json({ producer, user });
-    }
+    const producer = await ProducerStore.addPromotion(req.user.sub, req.body);
+    res.json(producer.promotions);
   } catch (err) {
     res.status(500).json({
-      message: 'Profile update error',
+      message: 'Promotion add error',
+      error: err,
+    });
+  }
+};
+
+exports.deletePromotion = async (req, res) => {
+  try {
+    console.log('PARAMS', req.params.id);
+    const producer = await ProducerStore.deletePromotion(req.user.sub, req.params.id);
+    res.json(producer.promotions);
+  } catch (err) {
+    res.status(500).json({
+      message: 'Promotion delete error',
       error: err,
     });
   }

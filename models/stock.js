@@ -7,12 +7,14 @@ const StockSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   name: { type: String, required: true },
   packSize: { type: String, required: true },
-  abv: { type: Number, required: true },
+  abv: { type: Number },
   style: { type: String },
   availability: { type: String },
   display: { type: String },
   orderQuant: { type: Number },
   orderChange: { type: String },
+  imageSource: { type: String },
+  description: { type: String },
 }, { timestamps: true });
 
 module.exports = StockSchema;
