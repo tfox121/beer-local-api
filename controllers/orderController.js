@@ -4,7 +4,8 @@ const OrderStore = require('../stores/orderStore');
 const ProducerStore = require('../stores/producerStore');
 const RetailerStore = require('../stores/retailerStore');
 const User = require('../models/user');
-const { notificationTypes } = require('../constants');
+const { NOTIFICATION_TYPES } = require('../constants');
+const sendOrderEmail = require('../email');
 
 exports.getOrders = async (req, res) => {
   try {
@@ -67,15 +68,16 @@ exports.placeOrder = async (req, res, next) => {
     const newOrder = await OrderStore.placeOrder(
       req.user.sub, req.body.producerSub, req.body.orderItems,
     );
-
-    UserStore.addNotification(req.body.producerSub, notificationTypes.newOrder, newOrder._id, req.user.sub);
-    return res.json(newOrder);
+    UserStore.addNotification(req.body.producerSub, NOTIFICATION_TYPES.newOrder, newOrder._id, req.user.sub);
+    res.json(newOrder);
+    const retailer = await RetailerStore.findBySub(req.user.sub);
+    const producer = await ProducerStore.findBySub(req.body.producerSub);
+    sendOrderEmail(producer, retailer, newOrder);
   } catch (err) {
     res.status(500).send({
       message: 'Order placement error',
       error: err,
     });
-    return next(err);
   }
 };
 
@@ -85,7 +87,7 @@ exports.editOrder = async (req, res) => {
     const notifiedSub = req.role === 'producer' ? order.retailerSub : order.producerSub;
     UserStore.addNotification(
       notifiedSub,
-      notificationTypes.orderStatusChange,
+      NOTIFICATION_TYPES.orderStatusChange,
       order._id,
       req.user.sub,
     );
@@ -111,7 +113,7 @@ exports.addOrderMessage = async (req, res) => {
 
     UserStore.addNotification(
       notifiedSub,
-      notificationTypes.newOrderMessage,
+      NOTIFICATION_TYPES.newOrderMessage,
       order._id,
       req.user.sub,
     );

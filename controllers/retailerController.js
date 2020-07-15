@@ -4,7 +4,6 @@ module.exports = class RetailerController {
   static async findUser(req, res, next) {
     try {
       const user = await RetailerStore.findUser(req.params.businessId);
-      console.log('RETAILER RETRIEVED', user);
       if (user) {
         return res.json(user);
       }
