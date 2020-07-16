@@ -59,7 +59,7 @@ exports.getAll = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  console.log('UPDATING PROFILE');
+  console.log('UPDATING PROFILE', req.body);
   try {
     const producer = await ProducerStore.updateProfile(req.user.sub, req.body);
     const user = await UserStore.findUser(producer.sub);

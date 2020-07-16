@@ -29,7 +29,7 @@ const PromotionSchema = new mongoose.Schema({
 
 const ProducerUserSchema = new mongoose.Schema({
   sub: { type: String, required: true, index: { unique: true } },
-  businessId: { type: String, required: true },
+  businessId: { type: String, required: true, index: { unique: true } },
   salesEmail: { type: String, required: true },
   salesContactNumber: { type: String },
   intro: { type: String },
@@ -38,6 +38,11 @@ const ProducerUserSchema = new mongoose.Schema({
   blog: [BlogSchema],
   profileOptions: {
     stockCategories: { type: Array, default: [''] },
+    activeModules: { type: Array, default: ['blog', 'availability'] },
+    distantPurchasing: { type: Boolean, default: false },
+    distantPurchasingConditions: {
+      minSpend: { type: Number },
+    },
   },
   followingRetailers: [FollowingRetailerSchema],
   promotions: [PromotionSchema],

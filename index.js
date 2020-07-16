@@ -1,6 +1,7 @@
 /* eslint consistent-return:0 import/order:0 */
 require('dotenv').config();
 const mongoose = require('mongoose');
+const chalk = require('chalk');
 const express = require('express');
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
@@ -17,6 +18,25 @@ const OrderRoute = require('./routes/orderRoute');
 const PublicRoute = require('./routes/publicRoute');
 const ProducerRoute = require('./routes/producerRoute');
 const RetailerRoute = require('./routes/retailerRoute');
+const ImageRoute = require('./routes/imageRoute');
+
+const morganMiddleware = logger((tokens, req, res) => [
+  '\n\n\n',
+  chalk.hex('#ff4757').bold('🍄'),
+  chalk.hex('#34ace0').bold(tokens.method(req, res)),
+  chalk.hex('#ffb142').bold(tokens.status(req, res)),
+  chalk.hex('#ff5252').bold(tokens.url(req, res)),
+  chalk.hex('#2ed573').bold(`${tokens['response-time'](req, res)} ms`),
+  chalk.hex('#f78fb3').bold(`@ ${tokens.date(req, res)}`),
+  chalk.yellow(tokens['remote-addr'](req, res)),
+  chalk.hex('#cfca4c').bold(`from ${tokens.referrer(req, res)}`),
+  chalk.hex('#1e90ff')(tokens['user-agent'](req, res)),
+  '\n\n\n',
+].join(' '));
+
+app.use(morganMiddleware);
+// app.use(logger('dev'));
+// app.use(logger('combined'));
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -31,17 +51,10 @@ const checkJwt = jwt({
     jwksRequestsPerMinute: 5,
     jwksUri: 'https://tfox121.eu.auth0.com/.well-known/jwks.json',
   }),
-
-  // Validate the audience and the issuer.
   audience: 'https://beerlocal/api',
   issuer: 'https://tfox121.eu.auth0.com/',
   algorithms: ['RS256'],
 });
-
-// If you need a backend, e.g. an API, add your custom backend-specific middleware here
-// app.use('/api', myApi);
-
-app.use(logger('combined'));
 
 app.use((req, res, next) => {
   res.setHeader(
@@ -84,24 +97,24 @@ app.use(cors(corsOptions));
 
 // app.use(express.static('public')); << seems to prevent console logs.
 
-const formParse = async (req, res, next) => {
-  const form = new formidable.IncomingForm();
-  form.keepExtensions = true;
-  form.parse(req, (err, fields, files) => {
-    if (err) {
-      next(err);
-      return;
-    }
-    req.fields = fields;
-    req.files = files;
-  });
-  next();
-};
+// const formParse = async (req, res, next) => {
+//   const form = new formidable.IncomingForm();
+//   form.keepExtensions = true;
+//   form.parse(req, (err, fields, files) => {
+//     if (err) {
+//       next(err);
+//       return;
+//     }
+//     req.fields = fields;
+//     req.files = files;
+//   });
+//   next();
+// };
 
-app.use(formParse);
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: false }));
-app.use(logger('dev'));
+// app.use(formParse);
+
+app.use(express.json()); app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: false }));
 
 const attachUser = async (req, res, next) => {
   if (req.user && req.user.sub) {
@@ -118,11 +131,14 @@ const attachUser = async (req, res, next) => {
 };
 
 // Routes
-app.use('/api/private/user', checkJwt, attachUser, UserRoute);
-app.use('/api/private/orders', checkJwt, attachUser, OrderRoute);
-app.use('/api/private/producer', checkJwt, attachUser, ProducerRoute);
-app.use('/api/private/retailer', checkJwt, attachUser, RetailerRoute);
+
 app.use('/api', PublicRoute);
+app.use(checkJwt, attachUser);
+app.use('/api/private/user', UserRoute);
+app.use('/api/private/orders', OrderRoute);
+app.use('/api/private/producer', ProducerRoute);
+app.use('/api/private/retailer', RetailerRoute);
+app.use('/api/private/image', ImageRoute);
 
 // In production we need to pass these values in instead of relying on webpack
 // setup(app, {

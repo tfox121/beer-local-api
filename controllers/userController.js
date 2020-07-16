@@ -38,6 +38,7 @@ exports.findUser = async (req, res) => {
       });
     }
   } catch (err) {
+    console.error(err);
     res.status(500).send({
       message: 'User retrieval error',
       error: err,
@@ -51,6 +52,7 @@ exports.getOwnAvatar = async (req, res) => {
     res.set('Content-Type', avatar.contentType);
     res.send(avatar.data);
   } catch (err) {
+    console.error(err);
     res.status(500).json({
       message: 'Avatar retrieval error',
       error: err,
@@ -64,6 +66,7 @@ exports.getOwnBanner = async (req, res) => {
     res.set('Content-Type', banner.contentType);
     res.send(banner.data);
   } catch (err) {
+    console.error(err);
     res.status(500).json({
       message: 'Banner retrieval error',
       error: err,
@@ -125,6 +128,7 @@ exports.findUpdateUser = async (req, res) => {
       });
     }
   } catch (err) {
+    console.error(err);
     res.status(500).send({
       message: 'User update error',
     });
@@ -160,6 +164,7 @@ exports.findUpdateCreateProducerUser = async (req, res) => {
     );
     res.json({ user, business });
   } catch (err) {
+    console.error(err);
     res.status(500).send({
       message: 'User creation error',
     });
@@ -234,6 +239,7 @@ exports.avatarUpload = async (req, res) => {
       if (!err) res.status(200).json(req.file);
     });
   } catch (err) {
+    console.error(err);
     res.status(500).send({
       message: 'File upload error',
     });
@@ -246,6 +252,7 @@ exports.addOrRemoveFollow = async (req, res) => {
     await ProducerStore.addOrRemoveFollow(req.body.follow, req.user.sub);
     res.json(retailer);
   } catch (err) {
+    console.error(err);
     res.status(500).send({
       message: 'Follow add error',
       error: err,
@@ -258,6 +265,7 @@ exports.notificationDismiss = async (req, res) => {
     const user = await UserStore.dismissNotification(req.user.sub, req.params.id);
     res.json(user);
   } catch (err) {
+    console.error(err);
     res.status(500).send({
       message: 'Notification dismiss error',
       error: err,
@@ -275,6 +283,7 @@ exports.notificationsDismiss = async (req, res) => {
     })));
     res.json({ ...user._doc, notifications });
   } catch (err) {
+    console.error(err);
     res.status(500).send({
       message: 'Notifications dismiss error',
       error: err,
