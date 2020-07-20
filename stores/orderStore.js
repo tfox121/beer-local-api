@@ -9,13 +9,20 @@ exports.placeOrder = async (retailerSub, producerSub, items) => {
   return newOrder.save();
 };
 
-exports.editOrder = async (orderId, orderChanges) => {
+exports.editOrder = async (orderId, orderChanges, role) => {
   const order = await Order.findById(orderId);
+
+  if ((order.status === 'Cancelled' && role === 'producer') || (order.status === 'Rejected' && role === 'retailer')) {
+    throw new Error('This order is no longer active');
+  }
   Object.keys(orderChanges).forEach((property) => {
     order[property] = orderChanges[property];
   });
+
   return order.save();
 };
+
+exports.deleteOrder = async (orderId) => Order.deleteOne({ _id: orderId });
 
 exports.addOrderMessage = async (orderId, sub, role, messageData) => {
   const order = await Order.findById(orderId);

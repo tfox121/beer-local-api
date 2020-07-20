@@ -8,7 +8,7 @@ const jwksRsa = require('jwks-rsa');
 const logger = require('morgan');
 const cors = require('cors');
 const port = require('./port');
-const formidable = require('formidable');
+// const formidable = require('formidable');
 
 const app = express();
 
@@ -21,7 +21,7 @@ const RetailerRoute = require('./routes/retailerRoute');
 const ImageRoute = require('./routes/imageRoute');
 
 const morganMiddleware = logger((tokens, req, res) => [
-  '\n\n\n',
+  '\n',
   chalk.hex('#ff4757').bold('🍄'),
   chalk.hex('#34ace0').bold(tokens.method(req, res)),
   chalk.hex('#ffb142').bold(tokens.status(req, res)),
@@ -31,7 +31,7 @@ const morganMiddleware = logger((tokens, req, res) => [
   chalk.yellow(tokens['remote-addr'](req, res)),
   chalk.hex('#cfca4c').bold(`from ${tokens.referrer(req, res)}`),
   chalk.hex('#1e90ff')(tokens['user-agent'](req, res)),
-  '\n\n\n',
+  '\n',
 ].join(' '));
 
 app.use(morganMiddleware);
@@ -119,7 +119,7 @@ app.use(express.urlencoded({ extended: false }));
 const attachUser = async (req, res, next) => {
   if (req.user && req.user.sub) {
     try {
-      const user = await UserStore.findUser(req.user.sub);
+      const user = await UserStore.findBySub(req.user.sub);
       if (user) {
         req.role = user.role;
       }

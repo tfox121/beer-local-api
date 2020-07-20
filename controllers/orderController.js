@@ -3,7 +3,6 @@ const UserStore = require('../stores/userStore');
 const OrderStore = require('../stores/orderStore');
 const ProducerStore = require('../stores/producerStore');
 const RetailerStore = require('../stores/retailerStore');
-const User = require('../models/user');
 const { NOTIFICATION_TYPES } = require('../constants');
 const sendOrderEmail = require('../email');
 
@@ -21,7 +20,8 @@ exports.getOrders = async (req, res) => {
       if (req.role === 'retailer') {
         const producers = await Promise.all(orders.map(async (order) => {
           const producer = await ProducerStore.findBySub(order.producerSub);
-          return producer;
+          const user = await UserStore.findBySub(order.producerSub);
+          return { ...producer, ...user };
         }));
         res.json({ orders: orders.reverse(), businesses: producers.reverse() });
       }
@@ -31,6 +31,7 @@ exports.getOrders = async (req, res) => {
       });
     }
   } catch (err) {
+    console.error(err);
     res.status(500).json({
       message: 'Order fetch error',
       error: err,
@@ -56,6 +57,7 @@ exports.getOrder = async (req, res) => {
       });
     }
   } catch (err) {
+    console.error(err);
     res.status(500).json({
       message: 'Order fetch error',
       error: err,
@@ -63,7 +65,7 @@ exports.getOrder = async (req, res) => {
   }
 };
 
-exports.placeOrder = async (req, res, next) => {
+exports.placeOrder = async (req, res) => {
   try {
     const newOrder = await OrderStore.placeOrder(
       req.user.sub, req.body.producerSub, req.body.orderItems,
@@ -74,6 +76,7 @@ exports.placeOrder = async (req, res, next) => {
     const producer = await ProducerStore.findBySub(req.body.producerSub);
     sendOrderEmail(producer, retailer, newOrder);
   } catch (err) {
+    console.error(err);
     res.status(500).send({
       message: 'Order placement error',
       error: err,
@@ -83,7 +86,7 @@ exports.placeOrder = async (req, res, next) => {
 
 exports.editOrder = async (req, res) => {
   try {
-    const order = await OrderStore.editOrder(req.params.orderId, req.body);
+    const order = await OrderStore.editOrder(req.params.orderId, req.body, req.role);
     const notifiedSub = req.role === 'producer' ? order.retailerSub : order.producerSub;
     UserStore.addNotification(
       notifiedSub,
@@ -91,10 +94,44 @@ exports.editOrder = async (req, res) => {
       order._id,
       req.user.sub,
     );
-    res.json(order);
+    if (req.role === 'producer') {
+      const purchaser = await RetailerStore.findBySub(order.retailerSub);
+      res.json({ order, business: purchaser });
+    }
+    if (req.role === 'retailer') {
+      const producer = await ProducerStore.findBySub(order.producerSub);
+      res.json({ order, business: producer });
+    }
   } catch (err) {
+    console.log(err.message);
+    if (err.message === 'This order is no longer active') {
+      res.status(409).json({
+        message: 'This order is no longer actice',
+      });
+      return;
+    }
     res.status(500).json({
       message: 'Order update error',
+      error: err,
+    });
+  }
+};
+
+exports.deleteOrder = async (req, res) => {
+  try {
+    const order = await OrderStore.deleteOrder(req.params.orderId);
+    // const notifiedSub = req.role === 'producer' ? order.retailerSub : order.producerSub;
+    // UserStore.addNotification(
+    //   notifiedSub,
+    //   NOTIFICATION_TYPES.orderStatusChange,
+    //   order._id,
+    //   req.user.sub,
+    // );
+    res.json(order);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: 'Order delete error',
       error: err,
     });
   }
@@ -117,8 +154,16 @@ exports.addOrderMessage = async (req, res) => {
       order._id,
       req.user.sub,
     );
-    res.json(order);
+    if (req.role === 'producer') {
+      const purchaser = await RetailerStore.findBySub(order.retailerSub);
+      res.json({ order, business: purchaser });
+    }
+    if (req.role === 'retailer') {
+      const producer = await ProducerStore.findBySub(order.producerSub);
+      res.json({ order, business: producer });
+    }
   } catch (err) {
+    console.error(err);
     res.status(500).json({
       message: 'Order add message error',
       error: err,

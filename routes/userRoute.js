@@ -4,19 +4,13 @@ const UserController = require('../controllers/userController');
 
 // router.post('/user', UserController.findUpdateCreateUser);
 
-router.get('/', UserController.findUser);
+router.get('/', UserController.getOwnProfile);
 
-router.patch('/', UserController.findUpdateUser);
+router.post('/', UserController.findOrCreateUser);
 
-router.get('/avatar', UserController.getOwnAvatar);
+router.patch('/', UserController.findUpdateOwnProfile);
 
-router.get('/banner', UserController.getOwnBanner);
-
-router.post('/producer', UserController.findUpdateCreateProducerUser);
-
-router.post('/retailer', UserController.findUpdateCreateRetailerUser);
-
-router.post('/avatar', UserController.avatarUpload);
+// router.post('/retailer', UserController.findUpdateCreateRetailerUser);
 
 router.patch('/follow', UserController.addOrRemoveFollow);
 

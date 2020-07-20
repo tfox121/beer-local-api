@@ -42,7 +42,7 @@ exports.putImage = (req, res) => {
     };
 
     cloudFront.createInvalidation(parameters, (e, d) => {
-      if (e) console.log(e, e.stack); // an error occurred
+      if (e) console.error(e, e.stack); // an error occurred
       else console.log(d); // successful response
     });
   });

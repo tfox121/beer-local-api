@@ -4,10 +4,6 @@ const User = require('../models/user');
 
 module.exports = class RetailerStore {
   // find user according to id and role
-  static async findBybusinessId(businessId) {
-    return RetailerUser.findOne({ businessId });
-  }
-
   static async findBySub(sub) {
     const retailer = await RetailerUser.findOne({ sub });
     const user = await User.findOne({ sub });

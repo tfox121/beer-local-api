@@ -2,23 +2,21 @@
 const ProducerUser = require('../models/producerUser');
 const User = require('../models/user');
 
-exports.findById = async (businessId) => ProducerUser.findOne({ businessId });
-
 exports.findBySub = async (sub) => {
   const producer = await ProducerUser.findOne({ sub });
   const user = await User.findOne({ sub });
   return { ...user._doc, ...producer._doc };
 };
 
-exports.getAvatar = async (businessId) => {
-  const user = await User.findOne({ businessId });
-  return user.avatarSource;
-};
+// exports.getAvatar = async (businessId) => {
+//   const user = await User.findOne({ businessId });
+//   return user.avatarSource;
+// };
 
-exports.getBanner = async (businessId) => {
-  const user = await User.findOne({ businessId });
-  return user.bannerSource;
-};
+// exports.getBanner = async (businessId) => {
+//   const user = await User.findOne({ businessId });
+//   return user.bannerSource;
+// };
 
 exports.getAll = async () => {
   const producers = await ProducerUser.find({});
@@ -30,7 +28,6 @@ exports.getAll = async () => {
 exports.updateProfile = async (sub, updates) => ProducerUser.findOneAndUpdate({ sub },
   {
     ...updates,
-    businessId: updates.businessName.toLowerCase().replace(/[^\w]/g, ''),
   },
   {
     new: true,

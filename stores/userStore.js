@@ -3,7 +3,9 @@ const User = require('../models/user');
 const ProducerUser = require('../models/producerUser');
 const RetailerUser = require('../models/retailerUser');
 
-exports.findUser = async (sub) => User.findOne({ sub }).select('-avatarSource -bannerSource');
+exports.findBySub = async (sub) => User.findOne({ sub });
+
+exports.findByBusinessId = async (businessId) => User.findOne({ businessId });
 
 exports.getBusinessName = async (sub) => {
   const user = await User.findOne({ sub });
@@ -29,26 +31,33 @@ exports.findUpdateCreateUser = async (sub, profileData, role) => User.findOneAnd
   {
     sub,
     role,
-    businessId: profileData.businessName.toLowerCase().replace(/[^\w]/g, ''),
     ...profileData,
+    businessId: profileData.businessName.toLowerCase().replace(/[^\w]/g, ''),
   },
   {
     new: true,
     upsert: true,
   },
-).select('-avatarSource -bannerSource');
+);
 
-exports.findUpdateUser = async (sub, updatedData) => User.findOneAndUpdate(
-  { sub },
-  {
-    ...updatedData,
-    businessId: updatedData.businessName.toLowerCase().replace(/[^\w]/g, ''),
-  },
-  {
-    new: true,
-    upsert: false,
-  },
-).select('-avatarSource -bannerSource');
+exports.findUpdateUser = async (sub, updatedData) => {
+  const data = { ...updatedData };
+  if (data.businessName) {
+    data.businessId = data.businessName.toLowerCase().replace(/[^\w]/g, '');
+  }
+  return (
+    User.findOneAndUpdate(
+      { sub },
+      {
+        ...data,
+      },
+      {
+        new: true,
+        upsert: false,
+      },
+    )
+  );
+};
 
 // add new PRODUCER user if they don't exist or update if they do
 exports.findUpdateCreateProducerUser = async (sub, profileData) => ProducerUser.findOneAndUpdate(

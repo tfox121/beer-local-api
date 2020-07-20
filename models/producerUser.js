@@ -29,7 +29,7 @@ const PromotionSchema = new mongoose.Schema({
 
 const ProducerUserSchema = new mongoose.Schema({
   sub: { type: String, required: true, index: { unique: true } },
-  businessId: { type: String, required: true, index: { unique: true } },
+  // businessId: { type: String, index: { unique: true } },
   salesEmail: { type: String, required: true },
   salesContactNumber: { type: String },
   intro: { type: String },

@@ -10,17 +10,11 @@ const NotificationSchema = new mongoose.Schema({
 const UserSchema = new mongoose.Schema({
   sub: { type: String, required: true, index: { unique: true } },
   businessName: { type: String, required: true, index: { unique: true } },
-  businessId: { type: String, required: true, index: { unique: true } },
+  businessId: { type: String, index: { unique: true } },
   role: { type: String, required: true },
   website: { type: String },
-  avatarSource: {
-    data: Buffer,
-    contentType: String,
-  },
-  bannerSource: {
-    data: Buffer,
-    contentType: String,
-  },
+  avatarSource: { type: String },
+  bannerSource: { type: String },
   location: {
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },

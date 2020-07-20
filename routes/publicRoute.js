@@ -1,12 +1,9 @@
 const router = require('express').Router();
 
 const ProducerController = require('../controllers/producerController');
+const UserController = require('../controllers/userController');
 
-router.get('/producer/avatar/:businessId', ProducerController.getAvatar);
-
-router.get('/producer/banner/:businessId', ProducerController.getBanner);
-
-router.get('/producer/:businessId', ProducerController.findById);
+router.get('/producer/:businessId', UserController.getByBusinessId);
 
 router.get('/producers', ProducerController.getAll);
 

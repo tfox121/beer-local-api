@@ -10,6 +10,8 @@ router.get('/:orderId', OrderController.getOrder);
 
 router.patch('/:orderId', OrderController.editOrder);
 
+router.delete('/:orderId', OrderController.deleteOrder);
+
 router.post('/:orderId/message', OrderController.addOrderMessage);
 
 module.exports = router;
