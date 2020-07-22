@@ -6,13 +6,13 @@ router.patch('/profile', ProducerController.updateProfile);
 
 router.patch('/profile/options', ProducerController.updateProfileOptions);
 
-// router.get('/promotions', ProducerController.getPromotions)
+// router.get('/promotion', ProducerController.getPromotions)
 
-router.post('/promotions', ProducerController.addPromotion);
+router.post('/promotion', ProducerController.addPromotion);
 
-router.delete('/promotions/:id', ProducerController.deletePromotion);
+router.delete('/promotion/:id', ProducerController.deletePromotion);
 
-// router.patch('/promotions', ProducerController.editPromotion)
+// router.patch('/promotion', ProducerController.editPromotion)
 
 router.patch('/stock', ProducerController.updateStock);
 
