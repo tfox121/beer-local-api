@@ -2,9 +2,11 @@
   "name": "beer-local-api",
   "version": "1.0.0",
   "dependencies": {
+    "@mapbox/geojson-rewind": "^0.5.0",
     "aws-sdk": "^2.714.0",
     "chalk": "^2.4.2",
     "cors": "^2.8.5",
+    "d3": "^5.16.0",
     "dotenv": "^8.2.0",
     "express": "4.16.4",
     "express-jwt": "^5.3.3",

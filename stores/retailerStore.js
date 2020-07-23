@@ -2,6 +2,9 @@
 const RetailerUser = require('../models/retailerUser');
 const User = require('../models/user');
 const ProducerUser = require('../models/producerUser');
+const ProducerStore = require('./producerStore');
+
+const geoJsonContainsCoords = require('../lib/geoJsonContainsCoords');
 
 // find user according to id and role
 exports.findBySub = async (sub) => {
@@ -21,8 +24,9 @@ exports.addOrRemoveFollow = async (sub, following) => {
   return retailer.save();
 };
 
-exports.getFollowedProducers = async (sub) => {
+exports.getProducerFeed = async (sub) => {
   const retailer = await RetailerUser.findOne({ sub });
+  const retailerUserInfo = await User.findOne({ sub });
   const followedProducers = await Promise.all(
     retailer.followedProducers.map(async (producer) => {
       const producerInfo = await ProducerUser.findOne({ sub: producer.sub });
@@ -30,5 +34,10 @@ exports.getFollowedProducers = async (sub) => {
       return { ...producerInfo._doc, ...userInfo._doc };
     }),
   );
-  return followedProducers;
+  const allProducers = await ProducerStore.getAll();
+  console.log(allProducers.length);
+  const nearbyProducers = allProducers.filter((producer) => (
+    geoJsonContainsCoords(producer.distributionAreas, retailerUserInfo.location)
+  ));
+  return { followedProducers, nearbyProducers };
 };

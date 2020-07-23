@@ -19,10 +19,10 @@ exports.findUser = async (req, res) => {
   }
 };
 
-exports.getFollowedProducers = async (req, res) => {
+exports.getProducerFeed = async (req, res) => {
   try {
-    const producers = await RetailerStore.getFollowedProducers(req.user.sub);
-    res.json({ producers });
+    const producers = await RetailerStore.getProducerFeed(req.user.sub);
+    res.json(producers);
   } catch (err) {
     console.error(err);
     res.status(500).send({
