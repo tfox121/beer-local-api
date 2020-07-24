@@ -20,4 +20,6 @@ router.post('/blog', ProducerController.addBlogPost);
 
 router.patch('/blog', ProducerController.editBlogPost);
 
+router.get('/retailers', ProducerController.getNearbyRetailers);
+
 module.exports = router;

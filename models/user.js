@@ -19,6 +19,7 @@ const UserSchema = new mongoose.Schema({
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
   },
+  deliveryInstruction: { type: String },
   address: { type: String, required: true },
   terms: { type: Boolean, required: true },
   notifications: [NotificationSchema],

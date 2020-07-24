@@ -1,5 +1,8 @@
 const ProducerStore = require('../stores/producerStore');
+const RetailerStore = require('../stores/retailerStore');
 const UserStore = require('../stores/userStore');
+
+const geoJsonContainsCoords = require('../lib/geoJsonContainsCoords');
 
 // exports.getAvatar = async (req, res) => {
 //   try {
@@ -146,6 +149,22 @@ exports.editBlogPost = async (req, res) => {
     console.error(err);
     res.status(500).json({
       message: 'Blog edit error',
+      error: err,
+    });
+  }
+};
+
+exports.getNearbyRetailers = async (req, res) => {
+  try {
+    const producer = await ProducerStore.findBySub(req.user.sub);
+    const retailers = await RetailerStore.getAll();
+    const filteredRetailers = retailers
+      .filter((retailer) => geoJsonContainsCoords(producer.distributionAreas, retailer.location));
+    res.json({ retailers: filteredRetailers });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: 'Retailers fetch error',
       error: err,
     });
   }

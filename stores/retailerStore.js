@@ -13,6 +13,13 @@ exports.findBySub = async (sub) => {
   return { ...user._doc, ...retailer._doc };
 };
 
+exports.getAll = async () => {
+  const retailers = await RetailerUser.find({});
+  const users = await User.find({ role: 'retailer' });
+
+  return retailers.map((producer, index) => ({ ...producer._doc, ...users[index]._doc }));
+};
+
 exports.addOrRemoveFollow = async (sub, following) => {
   const retailer = await RetailerUser.findOne({ sub });
   const follow = retailer.followedProducers.filter((producer) => producer.sub === following);
