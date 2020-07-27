@@ -17,6 +17,7 @@ const geoJsonContainsCoords = require('../lib/geoJsonContainsCoords');
 //     });
 //   }
 // };
+
 // exports.getBanner = async (req, res) => {
 //   try {
 //     const banner = await ProducerStore.getBanner(req.params.businessId);
