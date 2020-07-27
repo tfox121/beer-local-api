@@ -10,7 +10,7 @@ const BlogSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const FollowingRetailerSchema = new mongoose.Schema({
-  sub: { type: String, required: true, index: { unique: true } },
+  sub: { type: String, required: true },
 }, { timestamps: true });
 
 const PromotionSchema = new mongoose.Schema({

@@ -100,6 +100,10 @@ exports.addNotification = async (sub, type, resourceId, from) => {
   return user.save();
 };
 
+exports.deleteNotificationsById = async (sub, resourceId) => User.update(
+  { sub }, { $pull: { notifications: { resourceId } } },
+);
+
 exports.dismissNotification = async (sub, id) => {
   const user = await User.findOne({ sub });
   user.notifications.id(id).read = true;

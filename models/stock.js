@@ -11,6 +11,7 @@ const StockSchema = new mongoose.Schema({
   style: { type: String },
   availability: { type: String },
   display: { type: String },
+  firstDisplayed: { type: Date },
   orderQuant: { type: Number },
   orderChange: { type: String },
   imageSource: { type: String },

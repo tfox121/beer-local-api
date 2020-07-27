@@ -71,7 +71,7 @@ exports.placeOrder = async (req, res) => {
       req.user.sub, req.body.producerSub, req.body.orderItems,
     );
     UserStore.addNotification(req.body.producerSub, NOTIFICATION_TYPES.newOrder, newOrder._id, req.user.sub);
-    res.json(newOrder);
+    res.json({ order: newOrder });
     const retailer = await RetailerStore.findBySub(req.user.sub);
     const producer = await ProducerStore.findBySub(req.body.producerSub);
     sendOrderEmail(producer, retailer, newOrder);
@@ -88,6 +88,9 @@ exports.editOrder = async (req, res) => {
   try {
     const order = await OrderStore.editOrder(req.params.orderId, req.body, req.role);
     const notifiedSub = req.role === 'producer' ? order.retailerSub : order.producerSub;
+    if (order.status === 'Cancelled') {
+      await UserStore.deleteNotificationsById(notifiedSub, order._id);
+    }
     UserStore.addNotification(
       notifiedSub,
       NOTIFICATION_TYPES.orderStatusChange,

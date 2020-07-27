@@ -1,4 +1,6 @@
 /* eslint-disable no-underscore-dangle */
+const { omit } = require('lodash');
+
 const ProducerUser = require('../models/producerUser');
 const User = require('../models/user');
 
@@ -52,15 +54,78 @@ exports.deletePromotion = async (sub, promotionId) => {
   return producer.save();
 };
 
-exports.updateStock = async (sub, stockData) => ProducerUser.findOneAndUpdate(
-  { sub },
-  {
-    stock: stockData,
-  },
-  {
-    new: true,
-  },
-);
+// exports.updateStock = async (sub, stockData) => ProducerUser.findOneAndUpdate(
+//   { sub },
+//   {
+//     stock: stockData,
+//   },
+//   {
+//     new: true,
+//   },
+// );
+
+exports.updateStock = async (sub, stockData) => {
+  const producer = await ProducerUser.findOne({ sub });
+
+  const existingStockObj = {};
+  const newStockObj = {};
+
+  producer.stock.forEach((stockItem) => {
+    existingStockObj[stockItem.id] = stockItem;
+  });
+  stockData.forEach((stockItem) => {
+    newStockObj[stockItem.id] = stockItem;
+  });
+
+  const everDisplayedCheck = stockData.map((stockItem) => {
+    if (stockItem.display === 'Show' && !stockItem.firstDisplayed) {
+      return { ...stockItem, firstDisplayed: Date.now() };
+    }
+    return stockItem;
+  });
+
+  const newItems = everDisplayedCheck.filter((stockItem) => !Object.keys(existingStockObj).includes(stockItem.id));
+
+  const deletedItems = producer.stock.filter((stockItem) => !Object.keys(newStockObj).includes(stockItem.id));
+
+  const cleanedItems = everDisplayedCheck.map((stockItem) => omit(stockItem, ['updatedAt', 'createdAt']));
+
+  const changedItems = cleanedItems.filter((stockItem) => {
+    if (!Object.keys(existingStockObj).includes(stockItem.id)) {
+      return false;
+    }
+    let changed = false;
+    Object.keys(stockItem).forEach((stockItemKey) => {
+      if (stockItemKey !== '_id' && stockItem[stockItemKey] !== existingStockObj[stockItem.id][stockItemKey]) {
+        changed = true;
+      }
+    });
+    return changed;
+  });
+
+  changedItems.forEach((changedItem) => {
+    const stockItem = producer.stock.id(changedItem._id);
+    if (stockItem) {
+      stockItem.set(changedItem);
+    }
+  });
+
+  deletedItems.forEach((deletedItem) => {
+    // ProducerUser.update(
+    //   { sub }, { $pull: { stock: { id: deletedItem.id } } },
+    // );
+    const stockItem = producer.stock.id(deletedItem._id);
+    if (stockItem) {
+      stockItem.remove();
+    }
+  });
+
+  newItems.forEach((newItem) => {
+    producer.stock.unshift(newItem);
+  });
+
+  return producer.save();
+};
 
 exports.addBlogPost = async (sub, blogData, { title, author, display }) => {
   const producer = await ProducerUser.findOne({ sub });

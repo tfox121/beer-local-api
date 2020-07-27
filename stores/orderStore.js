@@ -11,8 +11,7 @@ exports.placeOrder = async (retailerSub, producerSub, items) => {
 
 exports.editOrder = async (orderId, orderChanges, role) => {
   const order = await Order.findById(orderId);
-
-  if ((order.status === 'Cancelled' && role === 'producer') || (order.status === 'Rejected' && role === 'retailer')) {
+  if (!('retailerNotification' in orderChanges) && !('producerNotification' in orderChanges) && ((order.status === 'Cancelled' && role === 'producer') || (order.status === 'Rejected' && role === 'retailer'))) {
     throw new Error('This order is no longer active');
   }
   Object.keys(orderChanges).forEach((property) => {

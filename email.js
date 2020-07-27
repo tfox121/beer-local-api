@@ -32,7 +32,7 @@ const sendOrderEmail = (from, to, order) => {
     <br>
     <ul>
     ${order.items.map((orderItem) => (
-    `<li>${orderItem.orderQuant}x ${orderItem.name} - ${PACK_SIZES[orderItem.packSize]} - £${Number(orderItem.price.toFixed)(2)}</li>`
+    `<li>${orderItem.orderQuant}x ${orderItem.name} - ${PACK_SIZES[orderItem.packSize]} - £${Number(orderItem.price).toFixed(2)}</li>`
   ))}
     </ul>
     <br>

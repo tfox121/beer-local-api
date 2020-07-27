@@ -28,6 +28,7 @@ exports.addOrRemoveFollow = async (sub, following) => {
   } else {
     retailer.followedProducers.unshift({ sub: following });
   }
+  console.log('SAVING', retailer);
   return retailer.save();
 };
 
