@@ -70,7 +70,12 @@ exports.placeOrder = async (req, res) => {
     const newOrder = await OrderStore.placeOrder(
       req.user.sub, req.body.producerSub, req.body.orderItems,
     );
-    UserStore.addNotification(req.body.producerSub, NOTIFICATION_TYPES.newOrder, newOrder._id, req.user.sub);
+    UserStore.addNotification(
+      req.body.producerSub,
+      NOTIFICATION_TYPES.newOrder,
+      newOrder._id,
+      req.user.sub,
+    );
     res.json({ order: newOrder });
     const retailer = await RetailerStore.findBySub(req.user.sub);
     const producer = await ProducerStore.findBySub(req.body.producerSub);

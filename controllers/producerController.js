@@ -82,7 +82,7 @@ exports.updateProfileOptions = async (req, res) => {
 exports.addPromotion = async (req, res) => {
   try {
     const producer = await ProducerStore.addPromotion(req.user.sub, req.body);
-    res.json(producer.promotions);
+    res.json({ promotions: producer.promotions });
   } catch (err) {
     console.error(err);
     res.status(500).json({
@@ -94,9 +94,8 @@ exports.addPromotion = async (req, res) => {
 
 exports.deletePromotion = async (req, res) => {
   try {
-    console.log('PARAMS', req.params.id);
     const producer = await ProducerStore.deletePromotion(req.user.sub, req.params.id);
-    res.json(producer.promotions);
+    res.json({ promotions: producer.promotions });
   } catch (err) {
     console.error(err);
     res.status(500).json({

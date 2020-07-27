@@ -84,9 +84,11 @@ exports.updateStock = async (sub, stockData) => {
     return stockItem;
   });
 
-  const newItems = everDisplayedCheck.filter((stockItem) => !Object.keys(existingStockObj).includes(stockItem.id));
+  const newItems = everDisplayedCheck
+    .filter((stockItem) => !Object.keys(existingStockObj).includes(stockItem.id));
 
-  const deletedItems = producer.stock.filter((stockItem) => !Object.keys(newStockObj).includes(stockItem.id));
+  const deletedItems = producer.stock
+    .filter((stockItem) => !Object.keys(newStockObj).includes(stockItem.id));
 
   const cleanedItems = everDisplayedCheck.map((stockItem) => omit(stockItem, ['updatedAt', 'createdAt']));
 
