@@ -79,7 +79,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const whitelist = ['http://localhost:3000', 'https://beerlocal.herokuapp.com'];
+const whitelist = ['http://localhost:3000', 'http://localhost:3000/', 'https://beerlocal.herokuapp.com', 'https://beerlocal.herokuapp.com/'];
 const corsOptions = {
   optionsSuccessStatus: 200,
   origin(origin, callback) {
