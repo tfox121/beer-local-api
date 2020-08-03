@@ -12,3 +12,5 @@ exports.PACK_SIZES = {
   '24x330': '24x330ml',
   '24x440': '24x440ml',
 };
+
+exports.CONTACT_EMAIL = 'info@beerlocal.co.uk';

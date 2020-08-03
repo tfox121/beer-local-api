@@ -9,17 +9,27 @@ exports.findByBusinessId = async (businessId) => User.findOne({ businessId });
 
 exports.getBusinessName = async (sub) => {
   const user = await User.findOne({ sub });
-  return user.businessName;
+  if (user) {
+    return user.businessName;
+  }
+  return null;
 };
 
 exports.getAvatar = async (sub) => {
   const user = await User.findOne({ sub });
-  return user.avatarSource;
+  if (user) {
+    console.log('AVATAR', user);
+    return user.avatarSource;
+  }
+  return null;
 };
 
 exports.getBanner = async (sub) => {
   const user = await User.findOne({ sub });
-  return user.bannerSource;
+  if (user) {
+    return user.bannerSource;
+  }
+  return null;
 };
 
 exports.findProducerUser = async (sub) => ProducerUser.findOne({ sub });

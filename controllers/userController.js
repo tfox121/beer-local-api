@@ -2,6 +2,7 @@
 const UserStore = require('../stores/userStore');
 const ProducerStore = require('../stores/producerStore');
 const RetailerStore = require('../stores/retailerStore');
+const { sendWelcomeEmail } = require('../email/email');
 
 exports.getOwnProfile = async (req, res) => {
   try {
@@ -89,6 +90,9 @@ exports.findOrCreateUser = async (req, res) => {
       });
       return;
     }
+
+    sendWelcomeEmail({ ...user._doc, ...business._doc });
+
     res.json({ user, business });
   } catch (err) {
     console.error(err);
