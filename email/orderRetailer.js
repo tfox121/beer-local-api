@@ -6,19 +6,13 @@ const { PACK_SIZES } = require('../constants');
 exports.orderRetailer = (avatarSource, bannerSource, businessName, orderItems, orderNumber, orderDate, orderTotal, orderId, options) => mjml2html(`
   <mjml>
     <mj-head>
-      <mj-style inline="inline">
+      <mj-style>
         .white-background img {
           background-color: white !important;
-          min-width: 150px;
-          max-width: 150px;
-          margin: auto;
+          min-width: 120px;
+          max-width: 120px;
+          max-height: 120px;
           border-radius: 100px;
-        }
-      </mj-style>
-      <mj-style>
-        .red-text div {
-          color: red !important;
-          text-decoration: underline !important;
         }
       </mj-style>
     </mj-head>
@@ -29,9 +23,12 @@ exports.orderRetailer = (avatarSource, bannerSource, businessName, orderItems, o
         background-height="200px"
         background-url="${bannerSource || 'https://beerlocal-dev.s3.eu-west-2.amazonaws.com/blank-banner.png'}"
         background-color="#2a3448"
-        padding="20px"
+        padding-left="10px"
+        padding-right="10px"
+        padding-top="20px"
+        padding-bottom="20px"
         >
-        <mj-image css-class="white-background" src="${avatarSource || 'https://beerlocal-dev.s3.eu-west-2.amazonaws.com/blank-avatar.webp'}" border="2px solid white" alt="" ></mj-image>
+        <mj-image css-class="white-background" border-radius="100px" width="150px" height="150px" src="${avatarSource || 'https://beerlocal-dev.s3.eu-west-2.amazonaws.com/blank-avatar.webp'}" border="2px solid white" alt="" ></mj-image>
       </mj-hero>
       <mj-section background-color="#598392" padding-bottom="5px" padding-top="0">
         <mj-column width="100%">
@@ -54,7 +51,7 @@ exports.orderRetailer = (avatarSource, bannerSource, businessName, orderItems, o
           <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${moment(orderDate).format('LL')}</mj-text>
         </mj-column>
         <mj-column>
-          <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Total Price</strong></mj-text>
+          <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Estimated Total</strong></mj-text>
           <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">£${orderTotal.toFixed(2)}</mj-text>
         </mj-column>
       </mj-section>
@@ -62,7 +59,7 @@ exports.orderRetailer = (avatarSource, bannerSource, businessName, orderItems, o
       ${orderItems.map((orderItem) => (
     `<mj-section background-color="#124559" padding-bottom="15px">
       <mj-column>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${orderItem.name} (${PACK_SIZES[orderItem.packSize]})</mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="0px" padding-bottom="0px" padding-top="10px">${orderItem.name} (${PACK_SIZES[orderItem.packSize]})</mj-text>
       </mj-column>
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">£${orderItem.price.toFixed(2)}</mj-text>

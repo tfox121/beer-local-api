@@ -18,7 +18,6 @@ exports.getBusinessName = async (sub) => {
 exports.getAvatar = async (sub) => {
   const user = await User.findOne({ sub });
   if (user) {
-    console.log('AVATAR', user);
     return user.avatarSource;
   }
   return null;

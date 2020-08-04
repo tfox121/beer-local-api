@@ -1,19 +1,12 @@
   <mjml>
     <mj-head>
-      <mj-style inline="inline">
+      <mj-style>
         .white-background img {
           background-color: white !important;
-          min-width: 150px;
-          max-width: 150px;
-          margin: auto;
+          min-width: 120px;
+          max-width: 120px;
+          max-height: 120px;
           border-radius: 100px;
-          transform: translate(0px, 105px)
-        }
-      </mj-style>
-      <mj-style>
-        .red-text div {
-          color: red !important;
-          text-decoration: underline !important;
         }
       </mj-style>
     </mj-head>
@@ -24,9 +17,12 @@
         background-height="200px"
         background-url="https://beerlocal-dev.s3.eu-west-2.amazonaws.com/blank-banner.png"
         background-color="#2a3448"
-        padding="20px"
+        padding-left="10px"
+        padding-right="10px"
+        padding-top="20px"
+        padding-bottom="20px"
         >
-        <mj-image css-class="white-background" src="https://beerlocal-dev.s3.eu-west-2.amazonaws.com/blank-avatar.webp" border="2px solid white" alt="" ></mj-image>
+        <mj-image css-class="white-background" border-radius="100px" width="150px" height="150px" src="https://beerlocal-dev.s3.eu-west-2.amazonaws.com/blank-avatar.webp" border="2px solid white" alt="" ></mj-image>
       </mj-hero>
       <mj-section background-color="#598392" padding-bottom="5px" padding-top="0">
         <mj-column width="100%">
@@ -57,7 +53,7 @@
       ${orderItems.map((orderItem) => (
     `<mj-section background-color="#124559" padding-bottom="15px">
       <mj-column>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${orderItem.name} (${PACK_SIZES[orderItem.packSize]})</mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="0px" padding-bottom="0px" padding-top="10px">${orderItem.name} (${PACK_SIZES[orderItem.packSize]})</mj-text>
       </mj-column>
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${orderItem.orderQuant}</mj-text>

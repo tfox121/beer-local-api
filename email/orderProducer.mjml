@@ -27,12 +27,12 @@
         background-color="#2a3448"
         padding="20px"
         >
-        <mj-image css-class="white-background" src="https://beerlocal-dev.s3.eu-west-2.amazonaws.com/blank-avatar.webp" border="2px solid white" alt="" ></mj-image>
+        <!-- <mj-image css-class="white-background" src="https://beerlocal-dev.s3.eu-west-2.amazonaws.com/blank-avatar.webp" border="2px solid white" alt="" ></mj-image> -->
       </mj-hero>
       <mj-section background-color="#598392" padding-bottom="5px" padding-top="0">
         <mj-column width="100%">
           <mj-divider border-color="#ffffff" border-width="2px" border-style="solid" padding-left="0px" padding-right="0px" padding-bottom="60px" padding-top="0"></mj-divider>
-          <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px">
+          <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="0px">
             <span style="font-size:20px; font-weight:bold">An order has been submitted for approval.</span>
             <br/>
             <br/>
@@ -58,7 +58,7 @@
       ${orderItems.map((orderItem) => (
     `<mj-section background-color="#124559" padding-bottom="15px">
       <mj-column>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${orderItem.name} (${PACK_SIZES[orderItem.packSize]})</mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="0px" padding-bottom="0px" padding-top="10px">${orderItem.name} (${PACK_SIZES[orderItem.packSize]})</mj-text>
       </mj-column>
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${orderItem.orderQuant}</mj-text>

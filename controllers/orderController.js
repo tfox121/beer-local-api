@@ -4,7 +4,7 @@ const OrderStore = require('../stores/orderStore');
 const ProducerStore = require('../stores/producerStore');
 const RetailerStore = require('../stores/retailerStore');
 const { NOTIFICATION_TYPES } = require('../constants');
-const { sendRetailerOrderEmail } = require('../email/email');
+const { sendRetailerOrderEmail, sendProducerOrderEmail } = require('../email/email');
 
 exports.getOrders = async (req, res) => {
   try {
@@ -76,6 +76,9 @@ exports.placeOrder = async (req, res) => {
       newOrder._id,
       req.user.sub,
     );
+    const producer = await ProducerStore.findBySub(req.body.producerSub);
+    const retailer = await RetailerStore.findBySub(req.user.sub);
+    sendProducerOrderEmail(producer, newOrder, retailer);
     res.json({ order: newOrder });
   } catch (err) {
     console.error(err);
@@ -90,7 +93,7 @@ exports.editOrder = async (req, res) => {
   try {
     console.log('EDIT');
     const order = await OrderStore.editOrder(req.params.orderId, req.body, req.role);
-    const purchaser = await RetailerStore.findBySub(order.retailerSub);
+    const retailer = await RetailerStore.findBySub(order.retailerSub);
     const producer = await ProducerStore.findBySub(order.producerSub);
 
     const notifiedSub = req.role === 'producer' ? order.retailerSub : order.producerSub;
@@ -107,9 +110,9 @@ exports.editOrder = async (req, res) => {
       console.log('PRODUCER');
       if (order.status === 'Confirmed') {
         console.log('SENDING EMAIL');
-        sendRetailerOrderEmail(purchaser, order, producer);
+        sendRetailerOrderEmail(retailer, order, producer);
       }
-      res.json({ order, business: purchaser });
+      res.json({ order, business: retailer });
     }
 
     if (req.role === 'retailer') {

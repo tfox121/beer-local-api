@@ -6,6 +6,7 @@ const mg = require('nodemailer-mailgun-transport');
 const { CONTACT_EMAIL } = require('../constants');
 const { welcomeEmail } = require('./welcome.js');
 const { orderRetailer } = require('./orderRetailer');
+const { orderProducer } = require('./orderProducer');
 
 // This is your API key that you retrieve from www.mailgun.com/cp (free up to 10K monthly emails)
 const auth = {
@@ -25,8 +26,6 @@ const mjmlConfigDefault = {
 
 exports.sendWelcomeEmail = (to) => {
   const nodemailerMailgun = nodemailer.createTransport(mg(auth));
-
-  console.log('TO:', to);
 
   const mjmlOptions = {
     ...mjmlConfigDefault,
@@ -64,8 +63,6 @@ exports.sendWelcomeEmail = (to) => {
 
 exports.sendRetailerOrderEmail = (to, order, producer) => {
   const nodemailerMailgun = nodemailer.createTransport(mg(auth));
-
-  console.log('TO:', to);
 
   const mjmlOptions = {
     ...mjmlConfigDefault,
@@ -114,14 +111,12 @@ exports.sendRetailerOrderEmail = (to, order, producer) => {
 exports.sendProducerOrderEmail = (to, order, retailer) => {
   const nodemailerMailgun = nodemailer.createTransport(mg(auth));
 
-  console.log('TO:', to);
-
   const mjmlOptions = {
     ...mjmlConfigDefault,
   };
 
   try {
-    const { html, errors } = orderRetailer(
+    const { html, errors } = orderProducer(
       retailer.avatarSource,
       retailer.businessName,
       order.items,
@@ -135,11 +130,11 @@ exports.sendProducerOrderEmail = (to, order, retailer) => {
     console.log('HTML ERRORS:', errors);
 
     nodemailerMailgun.sendMail({
-      from: `${retailer.businessName} - BeerLocal <${retailer.purchasingEmail}>`,
+      from: `beerLocal <${CONTACT_EMAIL}>`,
       to: to.salesEmail, // An array if you have multiple recipients.
       cc: '',
       bcc: '',
-      subject: `New Order - SO-${order.orderNumber.toString().padStart(6, '0')}`,
+      subject: `New Order Received - ${retailer.businessName} SO-${order.orderNumber.toString().padStart(6, '0')}`,
       // 'h:Reply-To': 'reply2this@company.com',
       // You can use "html:" to send HTML email content. It's magic!
       html,

@@ -6,7 +6,6 @@ const { sendWelcomeEmail } = require('../email/email');
 
 exports.getOwnProfile = async (req, res) => {
   try {
-    console.log('FINDING USER', req.user);
     const user = await UserStore.findBySub(req.user.sub);
 
     let business;
@@ -104,13 +103,10 @@ exports.findOrCreateUser = async (req, res) => {
 
 exports.findUpdateOwnProfile = async (req, res) => {
   try {
-    console.log('USER', req.body);
     const user = await UserStore.findUpdateUser(
       req.user.sub,
       req.body,
     );
-
-    console.log('USER UPDATED', user.businessName);
 
     const { businessName } = req.body;
     let business;
@@ -135,7 +131,6 @@ exports.findUpdateOwnProfile = async (req, res) => {
           message: 'Invalid role',
         });
     }
-    console.log('BUSINESS', business.sub);
     if (user && business) {
       console.log('SUCCESS!');
       res.json({ user, business });
