@@ -79,7 +79,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const whitelist = ['http://localhost:3000', 'http://localhost:3000/', 'https://beerlocal.herokuapp.com', 'https://beerlocal.herokuapp.com/', 'https://tfox121.github.io/beer-local-client/', 'https://tfox121.github.io/beer-local-client'];
+const whitelist = ['http://localhost:3000', 'http://localhost:3000/', 'https://beerlocal.herokuapp.com', 'https://beerlocal.herokuapp.com/', 'https://tfox121.github.io/beer-local-client/', 'https://tfox121.github.io/beer-local-client', 'https://tfox121.github.io/', 'https://tfox121.github.io'];
 const corsOptions = {
   optionsSuccessStatus: 200,
   origin(origin, callback) {
