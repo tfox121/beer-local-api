@@ -79,7 +79,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const whitelist = ['http://localhost:3000', 'http://localhost:3000/', 'https://beerlocal.herokuapp.com', 'https://beerlocal.herokuapp.com/'];
+const whitelist = ['http://localhost:3000', 'http://localhost:3000/', 'https://beerlocal.herokuapp.com', 'https://beerlocal.herokuapp.com/', 'https://tfox121.github.io/beer-local-client/', 'https://tfox121.github.io/beer-local-client'];
 const corsOptions = {
   optionsSuccessStatus: 200,
   origin(origin, callback) {
@@ -131,6 +131,11 @@ const attachUser = async (req, res, next) => {
 };
 
 // Routes
+
+// // will redirect all the non-api routes to react frontend
+// app.use((req, res) => {
+//   res.sendFile(path.join(__dirname, '../client', 'build', 'index.html'));
+// });
 
 app.use('/api', PublicRoute);
 app.use(checkJwt, attachUser);
