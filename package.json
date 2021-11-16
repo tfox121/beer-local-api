@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@mapbox/geojson-rewind": "^0.5.0",
-    "aws-sdk": "^2.714.0",
+    "aws-sdk": "^2.814.0",
     "chalk": "^2.4.2",
     "cors": "^2.8.5",
     "d3": "^5.16.0",
